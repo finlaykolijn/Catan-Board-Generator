@@ -14,7 +14,7 @@ interface CatanBoardProps {
 const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height }) => {
   const [board, setBoard] = useState<CatanBoardType | null>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
-  const hexSize = 40;
+  const hexSize = 25;
   const useImages = options.useImages || false;
   
   // Preload images when useImages option changes
@@ -38,10 +38,18 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height }) 
     return <div>Loading images...</div>;
   }
   
-  // Calculate the stage scale to fit the board properly
+  // For pointy-top hexagons
+  const hexWidth = Math.sqrt(3) * hexSize;
+  const hexHeight = 2 * hexSize;
+  
+  // Calculate the board dimensions based on the honeycomb layout
+  const boardWidth = Math.sqrt(3) * hexSize * 5; // 5 is the max hexes in a row
+  const boardHeight = hexHeight * 0.75 * 4 + hexHeight * 0.25; // 5 rows with 75% overlap
+  
+  // Need to adjust to fit the board properly for pointy-top hexes
   const scaleFactor = Math.min(
-    width / (Math.sqrt(3) * hexSize * 7), // Increased width to ensure full board visibility
-    height / (hexSize * 2 * 6) // Increased height to ensure full board visibility
+    width / boardWidth * 0.85, // Use 85% of available width for better fit
+    height / boardHeight * 0.85 // Use 85% of available height for better fit
   );
   
   // Calculate the center of the board based on hexagon positions

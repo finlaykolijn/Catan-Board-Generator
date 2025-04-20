@@ -33,40 +33,55 @@ function shuffle<T>(array: T[]): T[] {
 // Calculate hex positions for a standard Catan board
 function calculateHexPositions(hexSize: number): { x: number, y: number }[] {
   const positions: { x: number, y: number }[] = [];
-  const hexHeight = hexSize * 2;
+  
+  // For pointy-top hexagons:
+  // Width is sqrt(3) * size, height is 2 * size
   const hexWidth = Math.sqrt(3) * hexSize;
+  const hexHeight = 2 * hexSize;
   
   // Define the number of hexes per row in a standard Catan board
   const rows = [3, 4, 5, 4, 3]; 
   
-  // Width is now 2*size, height is sqrt(3)*size
-  const flatHexWidth = hexSize * 2;
-  const flatHexHeight = Math.sqrt(3) * hexSize;
-  
-  // Rows are offset for proper hex tiling
-  // Each row is offset horizontally by half of a hex width for odd rows
+  // Start at a fixed position
   let yPos = 0;
   
   for (let row = 0; row < rows.length; row++) {
     const hexesInRow = rows[row];
-    const rowOffset = (5 - hexesInRow) * flatHexWidth / 2; // Center the row
+    
+    // Center the board overall, not each row individually
+    // This ensures rows mesh properly in a honeycomb pattern
+    const totalBoardWidth = Math.sqrt(3) * hexSize * 5; // Width of the widest row (5 hexes)
+    const rowWidth = hexWidth * hexesInRow; // Calculate without extra spacing
+    
+    // Base row offset to center the row
+    let rowOffset = (totalBoardWidth - rowWidth) / 2;
+    
+    // Specifically adjust rows 2 and 4 (index 1 and 3) half-hexagon to the left
+    // if (row === 1 || row === 3) {
+    //   rowOffset -= hexWidth / 4;
+    // }
     
     for (let col = 0; col < hexesInRow; col++) {
-      // Calculate the x position, offset alternating rows
-      const staggerOffset = row % 2 === 0 ? 0 : flatHexWidth / 2;
-      const xPos = rowOffset + col * flatHexWidth + staggerOffset;
+      // For standard honeycomb pattern, odd rows are offset by half width
+      // We're not using this offset now since we're explicitly shifting rows 2 and 4
+      const xOffset = 0;
+      
+      // Position with zero spacing between hexes in same row
+      const xPos = rowOffset + col * hexWidth + xOffset;
+      
       positions.push({ x: xPos, y: yPos });
     }
     
-    // Move down to the next row - move by 3/4 of the hexagon height
-    yPos += flatHexHeight * 0.75;
+    // For tight packing, move down by exactly 3/4 of the height (1.5 * size)
+    // This creates optimal vertical overlap for pointy-top hexes
+    yPos += hexHeight * 0.75;
   }
   
   return positions;
 }
 
 export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
-  const hexSize = 100; // Default hex size
+  const hexSize = 25; // Reduced the hex size for initial calculation (used to be 100)
   const resourceTypes = shuffle(STANDARD_RESOURCE_DISTRIBUTION);
   const numberTokens = shuffle(STANDARD_NUMBER_DISTRIBUTION);
   const positions = calculateHexPositions(hexSize);

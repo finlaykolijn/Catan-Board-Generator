@@ -60,14 +60,14 @@ const HexTile: React.FC<HexProps> = ({ hex, size, useImages = false }) => {
     <Group x={x} y={y}>
       {useImages && image ? (
         <Group>
-          {/* If using images, we'll use a hexagon clipping mask on the image */}
+          {/* If using images, use a hexagon clipping mask on the image */}
           <RegularPolygon
             sides={6}
             radius={size}
             fill={color}
             stroke="black"
             strokeWidth={1}
-            rotation={30}
+            rotation={0}
           />
           <Image
             image={image}
@@ -85,7 +85,7 @@ const HexTile: React.FC<HexProps> = ({ hex, size, useImages = false }) => {
           fill={color}
           stroke="black"
           strokeWidth={1}
-          rotation={30}
+          rotation={0}
         />
       )}
       
@@ -106,8 +106,8 @@ const HexTile: React.FC<HexProps> = ({ hex, size, useImages = false }) => {
             verticalAlign="middle"
             width={size / 1.5}
             height={size / 1.5}
-            offsetX={-size / 3}
-            offsetY={-size / 3}
+            offsetX={size / 3}
+            offsetY={size / 3}
           />
           {renderProbabilityDots()}
         </Group>
