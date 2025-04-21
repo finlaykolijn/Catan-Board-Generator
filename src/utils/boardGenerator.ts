@@ -20,6 +20,25 @@ const NUMBER_PROBABILITIES: Record<number, number> = {
   2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1
 };
 
+// Weight values correspond to exact percentages:
+// 60% for 6 and 8
+// 25% for 5 and 9
+// 10% for 4 and 10
+// 4% for 3 and 11
+// 1% for 2 and 12
+const NUMBER_WEIGHTS: Record<number, number> = {
+  6: 30, 
+  8: 30, 
+  5: 12.5, 
+  9: 12.5, 
+  4: 5, 
+  10: 5, 
+  3: 2, 
+  11: 2,
+  2: 0.5, 
+  12: 0.5 
+};
+
 // Fisher-Yates shuffle algorithm
 function shuffle<T>(array: T[]): T[] {
   const result = [...array];
@@ -34,7 +53,6 @@ function shuffle<T>(array: T[]): T[] {
 function calculateHexPositions(hexSize: number): { x: number, y: number }[] {
   const positions: { x: number, y: number }[] = [];
   
-  // For pointy-top hexagons:
   // Width is sqrt(3) * size, height is 2 * size
   const hexWidth = Math.sqrt(3) * hexSize;
   const hexHeight = 2 * hexSize;
@@ -56,14 +74,9 @@ function calculateHexPositions(hexSize: number): { x: number, y: number }[] {
     // Base row offset to center the row
     let rowOffset = (totalBoardWidth - rowWidth) / 2;
     
-    // Specifically adjust rows 2 and 4 (index 1 and 3) half-hexagon to the left
-    // if (row === 1 || row === 3) {
-    //   rowOffset -= hexWidth / 4;
-    // }
-    
     for (let col = 0; col < hexesInRow; col++) {
-      // For standard honeycomb pattern, odd rows are offset by half width
-      // We're not using this offset now since we're explicitly shifting rows 2 and 4
+
+      // For standard honeycomb pattern, odd rows are not offset.. should work
       const xOffset = 0;
       
       // Position with zero spacing between hexes in same row
@@ -72,7 +85,6 @@ function calculateHexPositions(hexSize: number): { x: number, y: number }[] {
       positions.push({ x: xPos, y: yPos });
     }
     
-    // For tight packing, move down by exactly 3/4 of the height (1.5 * size)
     // This creates optimal vertical overlap for pointy-top hexes
     yPos += hexHeight * 0.75;
   }
@@ -80,15 +92,50 @@ function calculateHexPositions(hexSize: number): { x: number, y: number }[] {
   return positions;
 }
 
+// Improved function to select a number based on weights
+function selectWeightedNumber(availableNumbers: number[]): number | null {
+  if (availableNumbers.length === 0) return null;
+  
+  // Filter only numbers that have weights
+  const numbersWithWeights = availableNumbers.filter(num => NUMBER_WEIGHTS[num] > 0);
+  
+  // If no numbers with weights are available, fall back to any available number
+  if (numbersWithWeights.length === 0) {
+    return availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
+  }
+  
+  // Calculate total weight of available numbers with weights
+  let totalWeight = 0;
+  for (const num of numbersWithWeights) {
+    totalWeight += NUMBER_WEIGHTS[num];
+  }
+  
+  // Generate a random value between 0 and total weight
+  const randomValue = Math.random() * totalWeight;
+  
+  // Select a number based on its weight
+  let cumulativeWeight = 0;
+  for (const num of numbersWithWeights) {
+    cumulativeWeight += NUMBER_WEIGHTS[num];
+    if (randomValue < cumulativeWeight) {
+      return num;
+    }
+  }
+  
+  // Fallback - return a random weighted number
+  return numbersWithWeights[Math.floor(Math.random() * numbersWithWeights.length)];
+}
+
 export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
-  const hexSize = 25; // Reduced the hex size for initial calculation (used to be 100)
+  const hexSize = 25; // Reduced the hex size for initial calculation
   const resourceTypes = shuffle(STANDARD_RESOURCE_DISTRIBUTION);
-  const numberTokens = shuffle(STANDARD_NUMBER_DISTRIBUTION);
+  let allNumberTokens = [...STANDARD_NUMBER_DISTRIBUTION]; // Keep a copy of all numbers
+  let numberTokens = [...STANDARD_NUMBER_DISTRIBUTION]; // Don't shuffle yet
   const positions = calculateHexPositions(hexSize);
   
   const hexes: Hex[] = [];
-  let numberTokenIndex = 0;
   
+  // Create all hexes first, without assigning numbers
   for (let i = 0; i < resourceTypes.length; i++) {
     const resourceType = resourceTypes[i];
     const position = positions[i];
@@ -99,11 +146,6 @@ export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
       x: position.x,
       y: position.y
     };
-    
-    // Add number token to all hexes except desert
-    if (resourceType !== 'desert') {
-      hex.number = numberTokens[numberTokenIndex++];
-    }
     
     hexes.push(hex);
   }
@@ -119,8 +161,100 @@ export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
       const desertHex = hexes[desertIndex];
       
       // Update resource types
-      hexes[middleIndex] = { ...desertHex, resourceType: 'desert', number: undefined };
+      hexes[middleIndex] = { ...desertHex, resourceType: 'desert' };
       hexes[desertIndex] = { ...middleHex, resourceType: middleHex.resourceType };
+    }
+  }
+  
+  // Group hexes by resource type
+  const hexesByResource: Record<ResourceType, Hex[]> = {
+    'forest': [],
+    'pasture': [],
+    'fields': [],
+    'hills': [],
+    'mountains': [],
+    'desert': []
+  };
+  
+  hexes.forEach(hex => {
+    if (hex.resourceType) {
+      hexesByResource[hex.resourceType].push(hex);
+    }
+  });
+  
+  // Assign numbers based on preferences
+  if (options.preferHighNumbersOn && options.preferHighNumbersOn.length > 0) {
+    // Track used numbers and how many of each we can use
+    const numberUsage: Record<number, number> = {};
+    
+    // Initialize with how many of each number we can use
+    for (const num of STANDARD_NUMBER_DISTRIBUTION) {
+      numberUsage[num] = (numberUsage[num] || 0) + 1;
+    }
+    
+    // Process preferred resources first
+    const preferredHexes: Hex[] = [];
+    
+    // Collect all hexes from preferred resources
+    for (const resourceType of options.preferHighNumbersOn) {
+      const resourceHexes = hexesByResource[resourceType];
+      if (resourceHexes && resourceHexes.length > 0) {
+        preferredHexes.push(...resourceHexes);
+      }
+    }
+    
+    // Shuffle preferred hexes to avoid bias between resources
+    const shuffledPreferredHexes = shuffle([...preferredHexes]);
+    
+    // Try to assign weighted numbers to preferred hexes first
+    for (const hex of shuffledPreferredHexes) {
+      // Get available numbers based on what's left in our usage count
+      const availableNumbers = Object.entries(numberUsage)
+        .filter(([_, count]) => count > 0)
+        .map(([num]) => parseInt(num));
+      
+      if (availableNumbers.length > 0) {
+        // Select a number using weighted probabilities
+        const selectedNumber = selectWeightedNumber(availableNumbers);
+        
+        if (selectedNumber !== null) {
+          // Assign number to hex
+          hex.number = selectedNumber;
+          
+          // Update usage count
+          numberUsage[selectedNumber]--;
+          
+          // Remove this number from our available tokens
+          const indexToRemove = numberTokens.indexOf(selectedNumber);
+          if (indexToRemove !== -1) {
+            numberTokens.splice(indexToRemove, 1);
+          }
+        }
+      }
+    }
+    
+    // Now assign remaining numbers to non-preferred resources
+    const remainingHexes = hexes.filter(hex => 
+      hex.resourceType !== 'desert' && hex.number === undefined
+    );
+    
+    // Shuffle the remaining numbers for random assignment
+    const remainingNumbers = shuffle([...numberTokens]);
+    
+    // Assign remaining numbers
+    for (let i = 0; i < remainingHexes.length; i++) {
+      if (i < remainingNumbers.length) {
+        remainingHexes[i].number = remainingNumbers[i];
+      }
+    }
+  } else {
+    // If no preferences, assign numbers randomly as before
+    numberTokens = shuffle(numberTokens);
+    let numberTokenIndex = 0;
+    for (const hex of hexes) {
+      if (hex.resourceType !== 'desert') {
+        hex.number = numberTokens[numberTokenIndex++];
+      }
     }
   }
   

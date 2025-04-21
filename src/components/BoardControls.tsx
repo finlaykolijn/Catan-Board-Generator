@@ -107,7 +107,6 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard }) => {
                 type="checkbox"
                 checked={options.preferHighNumbersOn?.includes(resource) || false}
                 onChange={() => handleResourcePreferenceChange(resource)}
-                disabled={true} // Not implemented yet
               />
               {resource.charAt(0).toUpperCase() + resource.slice(1)}
             </label>
