@@ -150,19 +150,30 @@ export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
     hexes.push(hex);
   }
   
-  // If desert should be in the middle and isn't already
+  // If desert option selected, move it to a non-edge position
   if (options.forceDesertInMiddle) {
-    const middleIndex = Math.floor(hexes.length / 2);
+    // Get the indices of the edge and non-edge hexes
+    const edgeIndices = [0, 1, 2, 3, 6, 7, 11, 12, 15, 16, 17, 18];
+    const nonEdgeIndices = [4, 5, 8, 9, 10, 13, 14];
+    
     const desertIndex = hexes.findIndex(hex => hex.resourceType === 'desert');
     
-    if (desertIndex !== middleIndex) {
-      // Swap the desert hex with the middle hex
-      const middleHex = hexes[middleIndex];
-      const desertHex = hexes[desertIndex];
+    // If desert is on an edge, move it to a non-edge position
+    if (edgeIndices.includes(desertIndex)) {
       
-      // Update resource types
-      hexes[middleIndex] = { ...desertHex, resourceType: 'desert' };
-      hexes[desertIndex] = { ...middleHex, resourceType: middleHex.resourceType };
+      // Choose a random non-edge index
+      const randomNonEdgeIndex = nonEdgeIndices[Math.floor(Math.random() * nonEdgeIndices.length)];
+      
+      // Get the hexes
+      const desertHex = hexes[desertIndex];
+      const nonEdgeHex = hexes[randomNonEdgeIndex];
+      
+      // Swap resources
+      const nonEdgeResource = nonEdgeHex.resourceType;
+      
+      // Update the hexes
+      hexes[randomNonEdgeIndex] = { ...nonEdgeHex, resourceType: 'desert' };
+      hexes[desertIndex] = { ...desertHex, resourceType: nonEdgeResource };
     }
   }
   
@@ -183,7 +194,7 @@ export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
   });
   
   // Assign numbers based on preferences
-  if (options.preferHighNumbersOn && options.preferHighNumbersOn.length > 0) {
+  if (options.biasResources && options.biasResources.length > 0) {
     // Track used numbers and how many of each we can use
     const numberUsage: Record<number, number> = {};
     
@@ -196,7 +207,7 @@ export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
     const preferredHexes: Hex[] = [];
     
     // Collect all hexes from preferred resources
-    for (const resourceType of options.preferHighNumbersOn) {
+    for (const resourceType of options.biasResources) {
       const resourceHexes = hexesByResource[resourceType];
       if (resourceHexes && resourceHexes.length > 0) {
         preferredHexes.push(...resourceHexes);

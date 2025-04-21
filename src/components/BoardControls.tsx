@@ -10,7 +10,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard }) => {
     forceDesertInMiddle: false,
     includeCitiesAndKnights: false,
     includeSeafarers: false,
-    preferHighNumbersOn: [],
+    biasResources: [],
     useImages: true // Default to using images
   });
 
@@ -24,14 +24,14 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard }) => {
 
   const handleResourcePreferenceChange = (resource: ResourceType) => {
     setOptions(prev => {
-      const currentPrefs = prev.preferHighNumbersOn || [];
+      const currentPrefs = prev.biasResources || [];
       const newPrefs = currentPrefs.includes(resource)
         ? currentPrefs.filter(r => r !== resource)
         : [...currentPrefs, resource];
       
       return {
         ...prev,
-        preferHighNumbersOn: newPrefs
+        biasResources: newPrefs
       };
     });
   };
@@ -67,7 +67,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard }) => {
               checked={options.forceDesertInMiddle}
               onChange={handleCheckboxChange}
             />
-            Force Desert in Middle
+            Force Desert Off Edge
           </label>
         </div>
         
@@ -99,13 +99,13 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard }) => {
       </div>
       
       <div className="control-section">
-        <h3>Prefer High Numbers On:</h3>
+        <h3>Bias these resources:</h3>
         <div className="resource-preference-group">
           {resourceTypes.map(resource => (
             <label key={resource}>
               <input
                 type="checkbox"
-                checked={options.preferHighNumbersOn?.includes(resource) || false}
+                checked={options.biasResources?.includes(resource) || false}
                 onChange={() => handleResourcePreferenceChange(resource)}
               />
               {resource.charAt(0).toUpperCase() + resource.slice(1)}
