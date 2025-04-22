@@ -47,7 +47,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
               checked={options.forceDesertInMiddle}
               onChange={handleCheckboxChange}
             />
-            Force Desert Off Edge
+            Force Desert Off Edge - Required for Fish
           </label>
         </div>
         

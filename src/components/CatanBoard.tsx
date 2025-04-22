@@ -9,9 +9,10 @@ interface CatanBoardProps {
   options?: BoardGeneratorOptions;
   width: number;
   height: number;
+  boardData?: CatanBoardType; // Add optional board data prop
 }
 
-const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height }) => {
+const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, boardData }) => {
   const [board, setBoard] = useState<CatanBoardType | null>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const hexSize = 25;
@@ -27,9 +28,14 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height }) 
     }
   }, [useImages]);
   
+  // Use provided board data or generate a new one only on initial mount
   useEffect(() => {
-    setBoard(generateBoard(options));
-  }, [options]);
+    if (boardData) {
+      setBoard(boardData);
+    } else {
+      setBoard(generateBoard(options));
+    }
+  }, [boardData]);
   
   if (!board) {
     return <div>Loading...</div>;
@@ -49,8 +55,8 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height }) 
   
   // Need to adjust to fit the board properly for pointed top hexes
   const scaleFactor = Math.min(
-    width / boardWidth * 0.85, // Use 85% of available width for better fit
-    height / boardHeight * 0.85 // Use 85% of available height for better fit
+    width / boardWidth * 0.75, // Use 75% of available width for better fit
+    height / boardHeight * 0.75 // Use 75% of available height for better fit
   );
   
   // Calculate the center of the board based on hexagon positions
