@@ -16,6 +16,7 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height }) 
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const hexSize = 25;
   const useImages = options.useImages || false;
+  const showBorders = options.showBorders || false;
   
   // Preload images when useImages option changes
   useEffect(() => {
@@ -38,7 +39,7 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height }) 
     return <div>Loading images...</div>;
   }
   
-  // For pointy-top hexagons
+  // For hexagons with pointed top (not flat)
   const hexWidth = Math.sqrt(3) * hexSize;
   const hexHeight = 2 * hexSize;
   
@@ -46,7 +47,7 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height }) 
   const boardWidth = Math.sqrt(3) * hexSize * 5; // 5 is the max hexes in a row
   const boardHeight = hexHeight * 0.75 * 4 + hexHeight * 0.25; // 5 rows with 75% overlap
   
-  // Need to adjust to fit the board properly for pointy-top hexes
+  // Need to adjust to fit the board properly for pointed top hexes
   const scaleFactor = Math.min(
     width / boardWidth * 0.85, // Use 85% of available width for better fit
     height / boardHeight * 0.85 // Use 85% of available height for better fit
@@ -76,6 +77,7 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height }) 
             hex={hex} 
             size={hexSize} 
             useImages={useImages}
+            showBorders={showBorders}
           />
         ))}
       </Layer>

@@ -4,7 +4,7 @@ import { HexProps } from '../types/catan';
 import { getResourceColor, getProbabilityDots } from '../utils/boardGenerator';
 import { getResourceImage } from '../utils/resourceImages';
 
-const HexTile: React.FC<HexProps> = ({ hex, size, useImages = false }) => {
+const HexTile: React.FC<HexProps> = ({ hex, size, useImages = false, showBorders = false }) => {
   const { resourceType, number, x, y } = hex;
   const color = getResourceColor(resourceType);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
@@ -60,30 +60,33 @@ const HexTile: React.FC<HexProps> = ({ hex, size, useImages = false }) => {
     <Group x={x} y={y}>
       {useImages && image ? (
         <Group>
-          {/* If using images, use a hexagon clipping mask on the image */}
-          <RegularPolygon
-            sides={6}
-            radius={size}
-            fill={color}
-            stroke="black"
-            strokeWidth={1}
-            rotation={0}
-          />
+          {/* First render the image with slightly larger dimensions to avoid gaps */}
           <Image
             image={image}
-            width={size * 2}
-            height={size * 2}
+            width={size * 1.9}  // width and height of hexes adjusted to avoid gaps
+            height={size * 2.1} 
             offsetX={size}
             offsetY={size}
             listening={false}
           />
+          {/* Only show borders if showBorders is true */}
+          {showBorders && (
+            <RegularPolygon
+              sides={6}
+              radius={size}
+              fill="transparent"
+              stroke="black"
+              strokeWidth={1.5}
+              rotation={0}
+            />
+          )}
         </Group>
       ) : (
         <RegularPolygon
           sides={6}
           radius={size}
           fill={color}
-          stroke="black"
+          stroke={showBorders ? "black" : "transparent"}
           strokeWidth={1}
           rotation={0}
         />

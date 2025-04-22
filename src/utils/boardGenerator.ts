@@ -20,7 +20,7 @@ const NUMBER_PROBABILITIES: Record<number, number> = {
   2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1
 };
 
-// Weight values correspond to exact percentages:
+// Weight values
 // 60% for 6 and 8
 // 25% for 5 and 9
 // 10% for 4 and 10
@@ -68,7 +68,7 @@ function calculateHexPositions(hexSize: number): { x: number, y: number }[] {
     
     // Center the board overall, not each row individually
     // This ensures rows mesh properly in a honeycomb pattern
-    const totalBoardWidth = Math.sqrt(3) * hexSize * 5; // Width of the widest row (5 hexes)
+    const totalBoardWidth = Math.sqrt(3) * hexSize * 5; // Width of the widest row 
     const rowWidth = hexWidth * hexesInRow; // Calculate without extra spacing
     
     // Base row offset to center the row

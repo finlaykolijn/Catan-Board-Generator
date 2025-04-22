@@ -3,36 +3,28 @@ import { BoardGeneratorOptions, ResourceType } from '../types/catan';
 
 interface BoardControlsProps {
   onGenerateBoard: (options: BoardGeneratorOptions) => void;
+  options: BoardGeneratorOptions;
+  onOptionsChange: (options: BoardGeneratorOptions) => void;
 }
 
-const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard }) => {
-  const [options, setOptions] = useState<BoardGeneratorOptions>({
-    forceDesertInMiddle: false,
-    includeCitiesAndKnights: false,
-    includeSeafarers: false,
-    biasResources: [],
-    useImages: true // Default to using images
-  });
-
+const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange }) => {
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = event.target;
-    setOptions(prev => ({
-      ...prev,
+    onOptionsChange({
+      ...options,
       [name]: checked
-    }));
+    });
   };
 
   const handleResourcePreferenceChange = (resource: ResourceType) => {
-    setOptions(prev => {
-      const currentPrefs = prev.biasResources || [];
-      const newPrefs = currentPrefs.includes(resource)
-        ? currentPrefs.filter(r => r !== resource)
-        : [...currentPrefs, resource];
-      
-      return {
-        ...prev,
-        biasResources: newPrefs
-      };
+    const currentPrefs = options.biasResources || [];
+    const newPrefs = currentPrefs.includes(resource)
+      ? currentPrefs.filter(r => r !== resource)
+      : [...currentPrefs, resource];
+    
+    onOptionsChange({
+      ...options,
+      biasResources: newPrefs
     });
   };
 
@@ -46,18 +38,6 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard }) => {
     <div className="board-controls">
       <div className="control-section">
         <h3>Board Options</h3>
-        
-        <div className="checkbox-group">
-          <label>
-            <input
-              type="checkbox"
-              name="useImages"
-              checked={options.useImages}
-              onChange={handleCheckboxChange}
-            />
-            Use Resource Images
-          </label>
-        </div>
         
         <div className="checkbox-group">
           <label>

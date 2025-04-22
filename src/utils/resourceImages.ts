@@ -1,13 +1,13 @@
 import { ResourceType, ResourceImages } from '../types/catan';
 
-// Resource images - currently not working
+// Resource images
 export const resourceImages: ResourceImages = {
-  'forest': '/src/assets/images/forest.png',
-  'pasture': '/src/assets/images/pasture.png',
-  'fields': '/src/assets/images/fields.png',
-  'hills': '/src/assets/images/hills.png',
-  'mountains': '/src/assets/images/mountains.png',
-  'desert': '/src/assets/images/desert.png',
+  'forest': 'src/assets/images/forest.png',
+  'pasture': 'src/assets/images/pasture.png',
+  'fields': 'src/assets/images/field.png',
+  'hills': 'src/assets/images/hill.png',
+  'mountains': 'src/assets/images/mountain.png',
+  'desert': 'src/assets/images/desert.png',
 };
 
 // Function to get the image path for a resource type

@@ -12,6 +12,7 @@ export interface HexProps {
   hex: Hex;
   size: number;
   useImages?: boolean;
+  showBorders?: boolean;
 }
 
 export interface CatanBoard {
@@ -22,8 +23,9 @@ export interface BoardGeneratorOptions {
   includeSeafarers?: boolean;
   includeCitiesAndKnights?: boolean;
   forceDesertInMiddle?: boolean;
-  preferHighNumbersOn?: ResourceType[];
+  biasResources?: ResourceType[];
   useImages?: boolean;
+  showBorders?: boolean;
 }
 
 export interface ResourceImages {
