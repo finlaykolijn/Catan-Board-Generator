@@ -46,7 +46,7 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
   }
   
   // For hexagons with pointed top (not flat)
-  const hexWidth = Math.sqrt(3) * hexSize;
+  //const hexWidth = Math.sqrt(3) * hexSize;
   const hexHeight = 2 * hexSize;
   
   // Calculate the board dimensions based on the honeycomb layout

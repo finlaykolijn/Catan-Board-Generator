@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { BoardGeneratorOptions, ResourceType } from '../types/catan';
 
 interface BoardControlsProps {

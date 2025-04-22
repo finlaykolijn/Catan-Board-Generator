@@ -129,7 +129,7 @@ function selectWeightedNumber(availableNumbers: number[]): number | null {
 export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
   const hexSize = 25; // Reduced the hex size for initial calculation
   const resourceTypes = shuffle(STANDARD_RESOURCE_DISTRIBUTION);
-  let allNumberTokens = [...STANDARD_NUMBER_DISTRIBUTION]; // Keep a copy of all numbers
+  //let allNumberTokens = [...STANDARD_NUMBER_DISTRIBUTION]; // Keep a copy of all numbers
   let numberTokens = [...STANDARD_NUMBER_DISTRIBUTION]; // Don't shuffle yet
   const positions = calculateHexPositions(hexSize);
   
