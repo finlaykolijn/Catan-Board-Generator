@@ -9,13 +9,14 @@ import './styles/BoardControls.css'
 
 function App() {
   const [boardKey, setBoardKey] = useState(0) // Used to force re-render of board
-  const [boardData, setBoardData] = useState<CatanBoardType | undefined>(undefined)
+  const [boardData, setBoardData] = useState<CatanBoardType | undefined>(undefined) // Initially set to undefined
   const [boardOptions, setBoardOptions] = useState<BoardGeneratorOptions>({
     useImages: true, // Default to using images
     showBorders: false, // Default to not showing borders
     forceDesertInMiddle: false,
     includeCitiesAndKnights: false,
     includeSeafarers: false,
+    fiveAndSixPlayerExpansion: false,
     biasResources: [],
   })
 
@@ -70,8 +71,8 @@ function App() {
       
       <footer className="App-footer">
         <p>
-          This is a basic Catan board generator. Future versions will include support for expansions
-          like Cities & Knights and Seafarers.
+          This Catan board generator supports both standard boards and the 5 & 6 player expansion.
+          Future versions will include support for other expansions like Cities & Knights and Seafarers.
         </p>
       </footer>
     </div>

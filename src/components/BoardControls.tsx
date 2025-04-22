@@ -46,7 +46,19 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
               checked={options.forceDesertInMiddle}
               onChange={handleCheckboxChange}
             />
-            Force Desert Off Edge - Required for Fish
+            Force Desert Off Edge (Interior Placement)
+          </label>
+        </div>
+        
+        <div className="checkbox-group">
+          <label>
+            <input
+              type="checkbox"
+              name="fiveAndSixPlayerExpansion"
+              checked={options.fiveAndSixPlayerExpansion}
+              onChange={handleCheckboxChange}
+            />
+            Use 5 & 6 Player Expansion Board
           </label>
         </div>
         

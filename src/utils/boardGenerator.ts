@@ -10,9 +10,24 @@ const STANDARD_RESOURCE_DISTRIBUTION: ResourceType[] = [
   'desert'                                     
 ];
 
+// 5 & 6 player expansion has 30 hexes with specific resource distribution
+const FIVE_SIX_PLAYER_RESOURCE_DISTRIBUTION: ResourceType[] = [
+  'forest', 'forest', 'forest', 'forest', 'forest', 'forest',      
+  'pasture', 'pasture', 'pasture', 'pasture', 'pasture', 'pasture', 
+  'fields', 'fields', 'fields', 'fields', 'fields', 'fields',      
+  'hills', 'hills', 'hills', 'hills', 'hills',                   
+  'mountains', 'mountains', 'mountains', 'mountains', 'mountains',      
+  'desert', 'desert'                                     
+];
+
 // Standard Catan number tokens
 const STANDARD_NUMBER_DISTRIBUTION: number[] = [
   2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12
+];
+
+// 5 & 6 player expansion number tokens
+const FIVE_SIX_PLAYER_NUMBER_DISTRIBUTION: number[] = [
+  2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12
 ];
 
 // Probability distribution based on standard token values
@@ -50,7 +65,7 @@ function shuffle<T>(array: T[]): T[] {
 }
 
 // Calculate hex positions for a standard Catan board
-function calculateHexPositions(hexSize: number): { x: number, y: number }[] {
+function calculateStandardHexPositions(hexSize: number): { x: number, y: number }[] {
   const positions: { x: number, y: number }[] = [];
   
   // Width is sqrt(3) * size, height is 2 * size
@@ -81,6 +96,45 @@ function calculateHexPositions(hexSize: number): { x: number, y: number }[] {
       
       // Position with zero spacing between hexes in same row
       const xPos = rowOffset + col * hexWidth + xOffset;
+      
+      positions.push({ x: xPos, y: yPos });
+    }
+    
+    // This creates optimal vertical overlap for pointy-top hexes
+    yPos += hexHeight * 0.75;
+  }
+  
+  return positions;
+}
+
+// Calculate hex positions for a 5 & 6 player Catan board
+function calculateFiveSixPlayerHexPositions(hexSize: number): { x: number, y: number }[] {
+  const positions: { x: number, y: number }[] = [];
+  
+  // Width is sqrt(3) * size, height is 2 * size
+  const hexWidth = Math.sqrt(3) * hexSize;
+  const hexHeight = 2 * hexSize;
+  
+  // Define the number of hexes per row for 5 & 6 player expansion
+  const rows = [3, 4, 5, 6, 5, 4, 3]; 
+  
+  // Start at a fixed position
+  let yPos = 0;
+  
+  for (let row = 0; row < rows.length; row++) {
+    const hexesInRow = rows[row];
+    
+    // Center the board overall, not each row individually
+    // This ensures rows mesh properly in a honeycomb pattern
+    const totalBoardWidth = Math.sqrt(3) * hexSize * 6; // Width of the widest row 
+    const rowWidth = hexWidth * hexesInRow; // Calculate without extra spacing
+    
+    // Base row offset to center the row
+    let rowOffset = (totalBoardWidth - rowWidth) / 2;
+    
+    for (let col = 0; col < hexesInRow; col++) {
+      // Position with zero spacing between hexes in same row
+      const xPos = rowOffset + col * hexWidth;
       
       positions.push({ x: xPos, y: yPos });
     }
@@ -128,10 +182,26 @@ function selectWeightedNumber(availableNumbers: number[]): number | null {
 
 export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
   const hexSize = 25; // Reduced the hex size for initial calculation
-  const resourceTypes = shuffle(STANDARD_RESOURCE_DISTRIBUTION);
-  //let allNumberTokens = [...STANDARD_NUMBER_DISTRIBUTION]; // Keep a copy of all numbers
-  let numberTokens = [...STANDARD_NUMBER_DISTRIBUTION]; // Don't shuffle yet
-  const positions = calculateHexPositions(hexSize);
+  
+  // Determine if using 5&6 player expansion
+  const isFiveSixPlayer = options.fiveAndSixPlayerExpansion || false;
+  
+  // Select appropriate resource distribution and number distribution
+  const resourceDistribution = isFiveSixPlayer 
+    ? FIVE_SIX_PLAYER_RESOURCE_DISTRIBUTION
+    : STANDARD_RESOURCE_DISTRIBUTION;
+    
+  const numberDistribution = isFiveSixPlayer
+    ? FIVE_SIX_PLAYER_NUMBER_DISTRIBUTION
+    : STANDARD_NUMBER_DISTRIBUTION;
+  
+  const resourceTypes = shuffle([...resourceDistribution]);
+  let numberTokens = [...numberDistribution]; // Don't shuffle yet
+  
+  // Calculate positions based on board type
+  const positions = isFiveSixPlayer
+    ? calculateFiveSixPlayerHexPositions(hexSize)
+    : calculateStandardHexPositions(hexSize);
   
   const hexes: Hex[] = [];
   
@@ -152,28 +222,74 @@ export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
   
   // If desert option selected, move it to a non-edge position
   if (options.forceDesertInMiddle) {
-    // Get the indices of the edge and non-edge hexes
-    const edgeIndices = [0, 1, 2, 3, 6, 7, 11, 12, 15, 16, 17, 18];
-    const nonEdgeIndices = [4, 5, 8, 9, 10, 13, 14];
+    // Define the edge and non-edge indices based on board type
+    let edgeIndices: number[] = [];
+    let nonEdgeIndices: number[] = [];
     
-    const desertIndex = hexes.findIndex(hex => hex.resourceType === 'desert');
+    if (isFiveSixPlayer) {
+      // Define edge and non-edge indices for 5&6 player board
+      // First row: 0-2
+      // Second row: 3-6
+      // Third row: 7-11
+      // Fourth row: 12-17
+      // Fifth row: 18-22
+      // Sixth row: 23-26
+      // Seventh row: 27-29
+      edgeIndices = [
+        0, 1, 2,                      // Top row
+        3, 6,                         // Second row edges
+        7, 11,                        // Third row edges
+        12, 17,                       // Fourth row edges
+        18, 22,                       // Fifth row edges
+        23, 26,                       // Sixth row edges
+        27, 28, 29                    // Bottom row
+      ];
+      
+      nonEdgeIndices = [
+        4, 5,                         // Second row interior
+        8, 9, 10,                     // Third row interior
+        13, 14, 15, 16,               // Fourth row interior
+        19, 20, 21,                   // Fifth row interior
+        24, 25                        // Sixth row interior
+      ];
+    } else {
+      // Standard board edge and non-edge indices
+      edgeIndices = [0, 1, 2, 3, 6, 7, 11, 12, 15, 16, 17, 18];
+      nonEdgeIndices = [4, 5, 8, 9, 10, 13, 14];
+    }
     
-    // If desert is on an edge, move it to a non-edge position
-    if (edgeIndices.includes(desertIndex)) {
-      
-      // Choose a random non-edge index
-      const randomNonEdgeIndex = nonEdgeIndices[Math.floor(Math.random() * nonEdgeIndices.length)];
-      
-      // Get the hexes
-      const desertHex = hexes[desertIndex];
-      const nonEdgeHex = hexes[randomNonEdgeIndex];
-      
-      // Swap resources
-      const nonEdgeResource = nonEdgeHex.resourceType;
-      
-      // Update the hexes
-      hexes[randomNonEdgeIndex] = { ...nonEdgeHex, resourceType: 'desert' };
-      hexes[desertIndex] = { ...desertHex, resourceType: nonEdgeResource };
+    // Get all desert indices
+    const desertIndices = hexes
+      .map((hex, index) => hex.resourceType === 'desert' ? index : -1)
+      .filter(index => index !== -1);
+    
+    // For each desert on an edge, try to move it to a non-edge position
+    for (const desertIndex of desertIndices) {
+      // If desert is on an edge, move it to a non-edge position
+      if (edgeIndices.includes(desertIndex)) {
+        // Get all available non-edge indices (that don't already have a desert)
+        const availableNonEdgeIndices = nonEdgeIndices.filter(index => 
+          hexes[index].resourceType !== 'desert'
+        );
+        
+        if (availableNonEdgeIndices.length > 0) {
+          // Choose a random non-edge index
+          const randomNonEdgeIndex = availableNonEdgeIndices[
+            Math.floor(Math.random() * availableNonEdgeIndices.length)
+          ];
+          
+          // Get the hexes
+          const desertHex = hexes[desertIndex];
+          const nonEdgeHex = hexes[randomNonEdgeIndex];
+          
+          // Swap resources
+          const nonEdgeResource = nonEdgeHex.resourceType;
+          
+          // Update the hexes
+          hexes[randomNonEdgeIndex] = { ...nonEdgeHex, resourceType: 'desert' };
+          hexes[desertIndex] = { ...desertHex, resourceType: nonEdgeResource };
+        }
+      }
     }
   }
   
@@ -199,7 +315,7 @@ export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
     const numberUsage: Record<number, number> = {};
     
     // Initialize with how many of each number we can use
-    for (const num of STANDARD_NUMBER_DISTRIBUTION) {
+    for (const num of numberDistribution) {
       numberUsage[num] = (numberUsage[num] || 0) + 1;
     }
     

@@ -1,12 +1,12 @@
 import { ResourceType, ResourceImages } from '../types/catan';
 
 // Import images directly to let Vite handle asset processing
-import forestImg from '../assets/images/forest.png';
-import pastureImg from '../assets/images/pasture.png';
-import fieldImg from '../assets/images/field.png';
-import hillImg from '../assets/images/hill.png';
-import mountainImg from '../assets/images/mountain.png';
-import desertImg from '../assets/images/desert.png';
+import forestImg from '../assets/images/resources/forest.png';
+import pastureImg from '../assets/images/resources/pasture.png';
+import fieldImg from '../assets/images/resources/field.png';
+import hillImg from '../assets/images/resources/hill.png';
+import mountainImg from '../assets/images/resources/mountain.png';
+import desertImg from '../assets/images/resources/desert.png';
 
 // Resource images
 export const resourceImages: ResourceImages = {

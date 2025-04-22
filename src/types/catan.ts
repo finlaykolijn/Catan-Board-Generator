@@ -22,6 +22,7 @@ export interface CatanBoard {
 export interface BoardGeneratorOptions {
   includeSeafarers?: boolean;
   includeCitiesAndKnights?: boolean;
+  fiveAndSixPlayerExpansion?: boolean;
   forceDesertInMiddle?: boolean;
   biasResources?: ResourceType[];
   useImages?: boolean;
