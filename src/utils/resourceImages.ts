@@ -1,13 +1,21 @@
 import { ResourceType, ResourceImages } from '../types/catan';
 
+// Import images directly to let Vite handle asset processing
+import forestImg from '../assets/images/forest.png';
+import pastureImg from '../assets/images/pasture.png';
+import fieldImg from '../assets/images/field.png';
+import hillImg from '../assets/images/hill.png';
+import mountainImg from '../assets/images/mountain.png';
+import desertImg from '../assets/images/desert.png';
+
 // Resource images
 export const resourceImages: ResourceImages = {
-  'forest': 'src/assets/images/forest.png',
-  'pasture': 'src/assets/images/pasture.png',
-  'fields': 'src/assets/images/field.png',
-  'hills': 'src/assets/images/hill.png',
-  'mountains': 'src/assets/images/mountain.png',
-  'desert': 'src/assets/images/desert.png',
+  'forest': forestImg,
+  'pasture': pastureImg,
+  'fields': fieldImg,
+  'hills': hillImg,
+  'mountains': mountainImg,
+  'desert': desertImg,
 };
 
 // Function to get the image path for a resource type
