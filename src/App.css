@@ -28,8 +28,9 @@
   overflow: hidden;
   margin-bottom: 20px;
   background-color: #f8f8f8;
-  min-width: 800px;
-  min-height: 700px;
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 1.14 / 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -58,6 +59,18 @@
   
   .board-container {
     flex: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .App {
+    padding: 10px;
+  }
+  
+  .board-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
 

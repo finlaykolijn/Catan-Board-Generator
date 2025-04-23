@@ -1,5 +1,5 @@
 import { Stage, Layer } from 'react-konva';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import HexTile from './HexTile';
 import { generateBoard } from '../utils/boardGenerator';
 import { CatanBoard as CatanBoardType, BoardGeneratorOptions } from '../types/catan';
@@ -9,16 +9,46 @@ interface CatanBoardProps {
   options?: BoardGeneratorOptions;
   width: number;
   height: number;
-  boardData?: CatanBoardType; // Add optional board data prop
+  boardData?: CatanBoardType; 
 }
 
 const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, boardData }) => {
   const [board, setBoard] = useState<CatanBoardType | null>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
-  const hexSize = 25;
+  const [stageSize, setStageSize] = useState({ width, height });
+  const stageRef = useRef<any>(null);
+  
+  // Calculate hex size based on screen dimensions
+  const calculateHexSize = () => {
+    const isMobile = window.innerWidth < 768;
+    const baseFactor = isMobile ? 20 : 25;
+    return options.fiveAndSixPlayerExpansion ? baseFactor * 0.85 : baseFactor;
+  };
+
+  const hexSize = calculateHexSize();
   const useImages = options.useImages || false;
   const showBorders = options.showBorders || false;
   const isFiveSixPlayer = options.fiveAndSixPlayerExpansion || false;
+  
+  // Update stage size when width/height props change
+  useEffect(() => {
+    setStageSize({ width, height });
+  }, [width, height]);
+
+  // Add resize listener
+  useEffect(() => {
+    const handleResize = () => {
+      if (stageRef.current) {
+        setStageSize({
+          width: window.innerWidth > 768 ? 800 : window.innerWidth - 40,
+          height: window.innerWidth > 768 ? 600 : window.innerWidth * 0.75
+        });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // Preload images when useImages option changes
   useEffect(() => {
@@ -59,8 +89,8 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
   
   // Need to adjust to fit the board properly for pointed top hexes
   const scaleFactor = Math.min(
-    width / boardWidth * 0.75, // Use 75% of available width for better fit
-    height / boardHeight * 0.75 // Use 75% of available height for better fit
+    stageSize.width / boardWidth * 0.8, // Use 80% of available width for better fit
+    stageSize.height / boardHeight * 0.8 // Use 80% of available height for better fit
   );
   
   // Calculate the center of the board based on hexagon positions
@@ -74,10 +104,10 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
   const centerY = (minY + maxY) / 2;
   
   return (
-    <Stage width={width} height={height}>
+    <Stage width={stageSize.width} height={stageSize.height} ref={stageRef}>
       <Layer
-        offsetX={centerX - width / (2 * scaleFactor)}
-        offsetY={centerY - height / (2 * scaleFactor)}
+        offsetX={centerX - stageSize.width / (2 * scaleFactor)}
+        offsetY={centerY - stageSize.height / (2 * scaleFactor)}
         scaleX={scaleFactor}
         scaleY={scaleFactor}
       >

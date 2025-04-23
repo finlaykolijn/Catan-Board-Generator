@@ -36,7 +36,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
   return (
     <div className="board-controls">
       <div className="control-section">
-        <h3>Board Options</h3>
+        <h3>Board Generation Options</h3>
         
         <div className="checkbox-group">
           <label>

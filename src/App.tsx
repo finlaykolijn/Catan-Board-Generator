@@ -65,8 +65,8 @@ function App() {
             key={boardKey}
             options={boardOptions}
             boardData={boardData}
-            width={800} 
-            height={600} 
+            width={window.innerWidth > 768 ? 800 : window.innerWidth - 40} 
+            height={window.innerWidth > 768 ? 600 : window.innerWidth * 0.75} 
           />
         </div>
       </main>
@@ -74,7 +74,7 @@ function App() {
       <footer className="App-footer">
         <p>
           This Catan board generator supports both standard boards and the 5 & 6 player expansion.
-          Future versions will include support for other expansions like Cities & Knights and Seafarers.
+          Future versions will include support for other expansions.
         </p>
       </footer>
     </div>
