@@ -62,8 +62,8 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
   const boardHeight = hexHeight * 0.75 * (numRows - 1) + hexHeight * 0.25;
   
   // Adjust scaling factor for better mobile experience
-  const mobileScaleFactor = 0.9; // Use 90% on mobile for better view
-  const desktopScaleFactor = 0.85; // Use 85% on desktop for better fit
+  const mobileScaleFactor = 0.8; // Use 90% on mobile for better view
+  const desktopScaleFactor = 0.8; // Use 85% on desktop for better fit
   
   // Calculate scale factor based on device type and available space
   const scaleFactor = Math.min(
