@@ -1,5 +1,5 @@
 import { Stage, Layer } from 'react-konva';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import HexTile from './HexTile';
 import { generateBoard } from '../utils/boardGenerator';
 import { CatanBoard as CatanBoardType, BoardGeneratorOptions } from '../types/catan';
@@ -15,6 +15,7 @@ interface CatanBoardProps {
 const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, boardData }) => {
   const [board, setBoard] = useState<CatanBoardType | null>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const stageRef = useRef<any>(null);
   const hexSize = 25;
   const useImages = options.useImages || false;
   const showBorders = options.showBorders || false;
@@ -38,6 +39,9 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
     }
   }, [boardData]);
   
+  // Detect if we're on a mobile device
+  const isMobile = width < 768;
+  
   if (!board) {
     return <div>Loading...</div>;
   }
@@ -57,10 +61,14 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
   const boardWidth = Math.sqrt(3) * hexSize * maxHexesInRow;
   const boardHeight = hexHeight * 0.75 * (numRows - 1) + hexHeight * 0.25;
   
-  // Need to adjust to fit the board properly for pointed top hexes
+  // Adjust scaling factor for better mobile experience
+  const mobileScaleFactor = 0.9; // Use 90% on mobile for better view
+  const desktopScaleFactor = 0.85; // Use 85% on desktop for better fit
+  
+  // Calculate scale factor based on device type and available space
   const scaleFactor = Math.min(
-    width / boardWidth * 0.75, // Use 75% of available width for better fit
-    height / boardHeight * 0.75 // Use 75% of available height for better fit
+    width / boardWidth * (isMobile ? mobileScaleFactor : desktopScaleFactor),
+    height / boardHeight * (isMobile ? mobileScaleFactor : desktopScaleFactor)
   );
   
   // Calculate the center of the board based on hexagon positions
@@ -73,11 +81,15 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
   const centerX = (minX + maxX) / 2;
   const centerY = (minY + maxY) / 2;
   
+  // Improved position adjustment
+  const offsetX = centerX - width / (2 * scaleFactor);
+  const offsetY = centerY - height / (2 * scaleFactor);
+  
   return (
-    <Stage width={width} height={height}>
+    <Stage width={width} height={height} ref={stageRef}>
       <Layer
-        offsetX={centerX - width / (2 * scaleFactor)}
-        offsetY={centerY - height / (2 * scaleFactor)}
+        offsetX={offsetX}
+        offsetY={offsetY}
         scaleX={scaleFactor}
         scaleY={scaleFactor}
       >
