@@ -65,8 +65,10 @@ function App() {
             key={boardKey}
             options={boardOptions}
             boardData={boardData}
-            width={window.innerWidth > 768 ? 800 : window.innerWidth - 40} 
-            height={window.innerWidth > 768 ? 600 : window.innerWidth * 0.75} 
+            width={800}
+            height={600}
+            //width={window.innerWidth > 768 ? 800 : window.innerWidth - 40} 
+            //height={window.innerWidth > 768 ? 600 : window.innerWidth * 0.75} 
           />
         </div>
       </main>
