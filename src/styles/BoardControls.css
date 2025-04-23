@@ -30,6 +30,9 @@
 
 .checkbox-group input[type="checkbox"] {
   margin-right: 8px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 
 .resource-preference-group {
@@ -54,6 +57,9 @@
 
 .resource-preference-group input[type="checkbox"] {
   margin-right: 8px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
 }
 
 .generate-button {

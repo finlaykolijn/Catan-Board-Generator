@@ -180,11 +180,88 @@ function selectWeightedNumber(availableNumbers: number[]): number | null {
   return numbersWithWeights[Math.floor(Math.random() * numbersWithWeights.length)];
 }
 
+// Function to find all adjacent hex indices
+function findAdjacentHexIndices(hexIndex: number, hexes: Hex[]): number[] {
+  const targetHex = hexes[hexIndex];
+  if (!targetHex) return [];
+  
+  // In a hexagonal grid, each hex has exactly 6 neighbors (or fewer at the edges)
+  // We can determine adjacency by calculating the Euclidean distance between centers
+  // Hexes with centers that are approximately 1 hex-width apart are adjacent
+  
+  const adjacentIndices: number[] = [];
+  
+  // Get all hexes except the target
+  const otherHexes = hexes.filter((_, index) => index !== hexIndex);
+  
+  // For each hex, check if it's adjacent to the target hex
+  otherHexes.forEach((otherHex, otherIndex) => {
+    // Calculate the real index in the original array
+    const realIndex = otherIndex >= hexIndex ? otherIndex + 1 : otherIndex;
+    
+    // Calculate Euclidean distance between hex centers
+    const dx = targetHex.x - otherHex.x;
+    const dy = targetHex.y - otherHex.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // In a hexagonal grid with pointy-top orientation, adjacent hexes have centers
+    // that are approximately sqrt(3) * hexSize apart
+    // Using a small tolerance to account for floating-point errors
+    // The hexSize is 25 as defined in the generateBoard function
+    const hexSize = 25;
+    const expectedDistance = Math.sqrt(3) * hexSize;
+    const tolerance = expectedDistance * 0.2; // 20% tolerance
+    
+    if (Math.abs(distance - expectedDistance) < tolerance) {
+      adjacentIndices.push(realIndex);
+    }
+  });
+  
+  return adjacentIndices;
+}
+
+// Function to check if a number placement would break adjacency rules
+function violatesNumberPlacementRules(
+  hexIndex: number, 
+  number: number, 
+  hexes: Hex[], 
+  allow6And8Adjacent: boolean,
+  allow2And12Adjacent: boolean
+): boolean {
+  const adjacentIndices = findAdjacentHexIndices(hexIndex, hexes);
+  
+  // Check adjacency rules
+  for (const adjIndex of adjacentIndices) {
+    const adjHex = hexes[adjIndex];
+    if (adjHex && adjHex.number !== undefined) {
+      // Check 6 and 8 adjacency rule
+      if (!allow6And8Adjacent) {
+        if ((number === 6 || number === 8) && (adjHex.number === 6 || adjHex.number === 8)) {
+          return true; // Rule violation: 6 and 8 cannot be adjacent
+        }
+      }
+      
+      // Check 2 and 12 adjacency rule
+      if (!allow2And12Adjacent) {
+        if ((number === 2 || number === 12) && (adjHex.number === 2 || adjHex.number === 12)) {
+          return true; // Rule violation: 2 and 12 cannot be adjacent
+        }
+      }
+    }
+  }
+  
+  return false; // No rules violated
+}
+
 export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
   const hexSize = 25; // Reduced the hex size for initial calculation
   
   // Determine if using 5&6 player expansion
   const isFiveSixPlayer = options.fiveAndSixPlayerExpansion || false;
+  
+  // Check adjacency options
+  const allow6And8Adjacent = options.allow6And8Adjacent || false;
+  const allow2And12Adjacent = options.allow2And12Adjacent || false;
   
   // Select appropriate resource distribution and number distribution
   const resourceDistribution = isFiveSixPlayer 
@@ -335,15 +412,59 @@ export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
     
     // Try to assign weighted numbers to preferred hexes first
     for (const hex of shuffledPreferredHexes) {
+      if (hex.resourceType === 'desert') continue;
+      
       // Get available numbers based on what's left in our usage count
       const availableNumbers = Object.entries(numberUsage)
         .filter(([_, count]) => count > 0)
         .map(([num]) => parseInt(num));
       
       if (availableNumbers.length > 0) {
-        // Select a number using weighted probabilities
-        const selectedNumber = selectWeightedNumber(availableNumbers);
+        // Try to find a number that doesn't break placement rules
+        let validNumbers = [...availableNumbers];
+        let selectedNumber: number | null = null;
         
+        // Try with weighted selection first
+        for (let attempts = 0; attempts < 5; attempts++) {
+          const testNumber = selectWeightedNumber(validNumbers);
+          if (testNumber !== null) {
+            // Check if this number violates placement rules
+            const hexIndex = hexes.findIndex(h => h.id === hex.id);
+            if (!violatesNumberPlacementRules(
+                hexIndex,
+                testNumber,
+                hexes,
+                allow6And8Adjacent,
+                allow2And12Adjacent
+              )) {
+              selectedNumber = testNumber;
+              break;
+            } else {
+              // Remove this number from valid options and try again
+              validNumbers = validNumbers.filter(n => n !== testNumber);
+              if (validNumbers.length === 0) break;
+            }
+          }
+        }
+        
+        // If we couldn't find a valid number with weighted selection, try any valid number
+        if (selectedNumber === null && validNumbers.length > 0) {
+          for (const num of validNumbers) {
+            const hexIndex = hexes.findIndex(h => h.id === hex.id);
+            if (!violatesNumberPlacementRules(
+                hexIndex,
+                num,
+                hexes,
+                allow6And8Adjacent,
+                allow2And12Adjacent
+              )) {
+              selectedNumber = num;
+              break;
+            }
+          }
+        }
+        
+        // If a valid number is found, assign it
         if (selectedNumber !== null) {
           // Assign number to hex
           hex.number = selectedNumber;
@@ -365,22 +486,104 @@ export function generateBoard(options: BoardGeneratorOptions = {}): CatanBoard {
       hex.resourceType !== 'desert' && hex.number === undefined
     );
     
-    // Shuffle the remaining numbers for random assignment
-    const remainingNumbers = shuffle([...numberTokens]);
+    // Process remaining hexes with rule checking
+    for (const hex of remainingHexes) {
+      // Get available numbers
+      const availableNumbers = Object.entries(numberUsage)
+        .filter(([_, count]) => count > 0)
+        .map(([num]) => parseInt(num));
+      
+      if (availableNumbers.length > 0) {
+        // Try to find a number that doesn't break placement rules
+        let validNumbers = [...availableNumbers];
+        let selectedNumber: number | null = null;
+        
+        // Try each number until we find one that works
+        for (const num of validNumbers) {
+          const hexIndex = hexes.findIndex(h => h.id === hex.id);
+          if (!violatesNumberPlacementRules(
+              hexIndex,
+              num,
+              hexes,
+              allow6And8Adjacent,
+              allow2And12Adjacent
+            )) {
+            selectedNumber = num;
+            break;
+          }
+        }
+        
+        // If a valid number is found, assign it
+        if (selectedNumber !== null) {
+          // Assign number to hex
+          hex.number = selectedNumber;
+          
+          // Update usage count
+          numberUsage[selectedNumber]--;
+          
+          // Remove this number from our available tokens
+          const indexToRemove = numberTokens.indexOf(selectedNumber);
+          if (indexToRemove !== -1) {
+            numberTokens.splice(indexToRemove, 1);
+          }
+        }
+        // If no valid number found, leave this hex without a number for now
+      }
+    }
     
-    // Assign remaining numbers
-    for (let i = 0; i < remainingHexes.length; i++) {
-      if (i < remainingNumbers.length) {
-        remainingHexes[i].number = remainingNumbers[i];
+    // Final pass - if any hexes still don't have numbers, just assign something
+    const unassignedHexes = hexes.filter(hex => 
+      hex.resourceType !== 'desert' && hex.number === undefined
+    );
+    
+    if (unassignedHexes.length > 0 && Object.values(numberUsage).some(count => count > 0)) {
+      // Assign remaining numbers, even if they break the rules
+      for (const hex of unassignedHexes) {
+        const availableNumbers = Object.entries(numberUsage)
+          .filter(([_, count]) => count > 0)
+          .map(([num]) => parseInt(num));
+        
+        if (availableNumbers.length > 0) {
+          const num = availableNumbers[0]; // Just take the first one
+          hex.number = num;
+          numberUsage[num]--;
+        }
       }
     }
   } else {
-    // If no preferences, assign numbers randomly as before
+    // If no specific resource preferences, still respect adjacency rules
+    // Shuffle the numbers for initial random order
     numberTokens = shuffle(numberTokens);
-    let numberTokenIndex = 0;
-    for (const hex of hexes) {
-      if (hex.resourceType !== 'desert') {
-        hex.number = numberTokens[numberTokenIndex++];
+    
+    // For each non-desert hex, try to assign a valid number
+    for (const hex of hexes.filter(h => h.resourceType !== 'desert')) {
+      // Try each number until we find one that works
+      let assignedNumber = false;
+      
+      for (let i = 0; i < numberTokens.length; i++) {
+        const num = numberTokens[i];
+        const hexIndex = hexes.findIndex(h => h.id === hex.id);
+        
+        if (!violatesNumberPlacementRules(
+            hexIndex,
+            num,
+            hexes,
+            allow6And8Adjacent,
+            allow2And12Adjacent
+          )) {
+          // Assign this number
+          hex.number = num;
+          // Remove it from available tokens
+          numberTokens.splice(i, 1);
+          assignedNumber = true;
+          break;
+        }
+      }
+      
+      // If we couldn't find a valid number, just use the first available one
+      if (!assignedNumber && numberTokens.length > 0) {
+        hex.number = numberTokens[0];
+        numberTokens.splice(0, 1);
       }
     }
   }

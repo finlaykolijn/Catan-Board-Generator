@@ -18,6 +18,8 @@ function App() {
     includeSeafarers: false,
     fiveAndSixPlayerExpansion: false,
     biasResources: [],
+    allow6And8Adjacent: true, // Default to allowing 6's and 8's to touch
+    allow2And12Adjacent: true, // Default to allowing 2 and 12 to touch
   })
 
   // Generate a new board only when explicitly requested

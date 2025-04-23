@@ -27,6 +27,8 @@ export interface BoardGeneratorOptions {
   biasResources?: ResourceType[];
   useImages?: boolean;
   showBorders?: boolean;
+  allow6And8Adjacent?: boolean;
+  allow2And12Adjacent?: boolean;
 }
 
 export interface ResourceImages {

@@ -104,7 +104,7 @@ const HexTile: React.FC<HexProps> = ({ hex, size, useImages = false, showBorders
             text={number.toString()}
             fontSize={size / 2.5}
             fontStyle="bold"
-            fill="black"
+            fill={number === 6 || number === 8 ? 'red' : 'black'}
             align="center"
             verticalAlign="middle"
             width={size / 1.5}

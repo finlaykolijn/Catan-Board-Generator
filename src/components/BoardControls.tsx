@@ -66,6 +66,30 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
           <label>
             <input
               type="checkbox"
+              name="allow6And8Adjacent"
+              checked={options.allow6And8Adjacent}
+              onChange={handleCheckboxChange}
+            />
+            6's and 8's Can Touch
+          </label>
+        </div>
+        
+        <div className="checkbox-group">
+          <label>
+            <input
+              type="checkbox"
+              name="allow2And12Adjacent"
+              checked={options.allow2And12Adjacent}
+              onChange={handleCheckboxChange}
+            />
+            2 and 12 Can Touch
+          </label>
+        </div>
+        
+        <div className="checkbox-group">
+          <label>
+            <input
+              type="checkbox"
               name="includeCitiesAndKnights"
               checked={options.includeCitiesAndKnights}
               onChange={handleCheckboxChange}
