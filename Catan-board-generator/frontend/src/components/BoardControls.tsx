@@ -1,12 +1,13 @@
-import { BoardGeneratorOptions, ResourceType } from '../types/catan';
+import { BoardGeneratorOptions, ResourceType, CatanBoard } from '../types/catan';
 
 interface BoardControlsProps {
   onGenerateBoard: (options: BoardGeneratorOptions) => void;
   options: BoardGeneratorOptions;
   onOptionsChange: (options: BoardGeneratorOptions) => void;
+  boardData?: CatanBoard; // Add board data prop
 }
 
-const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange }) => {
+const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange, boardData }) => {
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = event.target;
     onOptionsChange({
@@ -29,6 +30,34 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
 
   const handleGenerateBoard = () => {
     onGenerateBoard(options);
+  };
+
+  const handleSaveBoard = () => {
+    if (!boardData) {
+      alert('No board data to save. Please generate a board first.');
+      return;
+    }
+
+    // Create a data object that includes both the board data and the generation options
+    const saveData = {
+      board: boardData,
+      options: options,
+      generatedAt: new Date().toISOString(),
+      version: '1.0'
+    };
+
+    // Create and download the JSON file
+    const dataStr = JSON.stringify(saveData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `catan-board-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const resourceTypes: ResourceType[] = ['forest', 'pasture', 'fields', 'hills', 'mountains'];
@@ -129,9 +158,18 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
         </div>
       </div>
       
-      <button className="generate-button" onClick={handleGenerateBoard}>
-        Generate New Board
-      </button>
+      <div className="button-group">
+        <button className="generate-button" onClick={handleGenerateBoard}>
+          Generate New Board
+        </button>
+        <button 
+          className="save-button" 
+          onClick={handleSaveBoard}
+          disabled={!boardData}
+        >
+          Save Board as JSON
+        </button>
+      </div>
     </div>
   );
 };

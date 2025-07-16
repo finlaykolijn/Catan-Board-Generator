@@ -78,6 +78,34 @@
   background-color: #ff8f00;
 }
 
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.save-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.save-button:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+}
+
 input[type="checkbox"]:disabled + span {
   color: #999;
 } 
