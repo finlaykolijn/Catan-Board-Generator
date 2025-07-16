@@ -54,6 +54,7 @@ function App() {
           onGenerateBoard={handleGenerateBoard} 
           options={boardOptions}
           onOptionsChange={handleOptionsChange}
+          boardData={boardData}
         />
         
         <div className="board-container">
