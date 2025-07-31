@@ -32,7 +32,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
     onGenerateBoard(options);
   };
 
-  const handleSaveBoard = () => {
+  const handleSaveBoard = async () => {
     if (!boardData) {
       alert('No board data to save. Please generate a board first.');
       return;
@@ -46,18 +46,38 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
       version: '1.0'
     };
 
-    // Create and download the JSON file
-    const dataStr = JSON.stringify(saveData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `catan-board-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    try {
+      const response = await fetch('http://localhost:3001/api/save-board', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(saveData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert('Board saved successfully to database!');
+        console.log('Board saved:', result);
+      } else {
+        // Check if response is JSON or HTML
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          alert(`Failed to save board: ${errorData.error || 'Unknown error'}`);
+          console.error('Save failed:', errorData);
+        } else {
+          // Server returned HTML instead of JSON (likely an error page)
+          const errorText = await response.text();
+          console.error('Server returned HTML:', errorText);
+          alert(`Server error: Received HTML response instead of JSON. Please check if the backend server is running on port 3001.`);
+        }
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Error saving board: ${errorMessage}`);
+      console.error('Network error:', error);
+    }
   };
 
   const resourceTypes: ResourceType[] = ['forest', 'pasture', 'fields', 'hills', 'mountains'];
