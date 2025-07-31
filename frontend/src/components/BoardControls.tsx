@@ -1,13 +1,18 @@
+import { useState } from 'react';
 import { BoardGeneratorOptions, ResourceType, CatanBoard } from '../types/catan';
+import BoardSelector from './BoardSelector';
 
 interface BoardControlsProps {
   onGenerateBoard: (options: BoardGeneratorOptions) => void;
   options: BoardGeneratorOptions;
   onOptionsChange: (options: BoardGeneratorOptions) => void;
   boardData?: CatanBoard; // Add board data prop
+  onLoadBoard: (board: CatanBoard, options: BoardGeneratorOptions) => void;
 }
 
-const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange, boardData }) => {
+const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange, boardData, onLoadBoard }) => {
+  const [showBoardSelector, setShowBoardSelector] = useState(false);
+
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = event.target;
     onOptionsChange({
@@ -78,6 +83,14 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
       alert(`Error saving board: ${errorMessage}`);
       console.error('Network error:', error);
     }
+  };
+
+  const handleLoadBoards = () => {
+    setShowBoardSelector(true);
+  };
+
+  const handleBoardSelect = (board: CatanBoard, boardOptions: BoardGeneratorOptions) => {
+    onLoadBoard(board, boardOptions);
   };
 
   const resourceTypes: ResourceType[] = ['forest', 'pasture', 'fields', 'hills', 'mountains'];
@@ -189,7 +202,19 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
         >
           Save Board to Database
         </button>
+        <button 
+          className="load-button" 
+          onClick={handleLoadBoards}
+        >
+          Load Saved Boards
+        </button>
       </div>
+
+      <BoardSelector
+        isOpen={showBoardSelector}
+        onClose={() => setShowBoardSelector(false)}
+        onBoardSelect={handleBoardSelect}
+      />
     </div>
   );
 };

@@ -20,6 +20,7 @@ const pool = new pg.Pool({
 app.get('/api/get-boards', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM public."base_catan_boards"')
+    //const result = await pool.query('SELECT id, board_name, board, created_at FROM public."base_catan_boards" ORDER BY created_at DESC')
     res.json(result.rows)
 
   } catch (err) {
@@ -27,6 +28,8 @@ app.get('/api/get-boards', async (req, res) => {
     res.status(500).json({ error: err.message })
   }
 })
+
+
 
 app.put('/api/save-board', async (req, res) => {
   try {
@@ -71,3 +74,20 @@ app.listen(3001, () => {
   console.log('API running on http://localhost:3001')
 })
 
+// Not currently used, could be useful later
+// app.get('/api/get-board/:id', async (req, res) => {
+//     try {
+//       const { id } = req.params;
+//       const result = await pool.query('SELECT * FROM public."base_catan_boards" WHERE id = $1', [id])
+      
+//       if (result.rows.length === 0) {
+//         return res.status(404).json({ error: 'Board not found' });
+//       }
+      
+//       res.json(result.rows[0])
+  
+//     } catch (err) {
+//       console.error("Query failed:", err)
+//       res.status(500).json({ error: err.message })
+//     }
+//   })

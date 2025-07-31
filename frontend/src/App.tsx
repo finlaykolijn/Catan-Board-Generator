@@ -30,6 +30,13 @@ function App() {
     setBoardKey(prevKey => prevKey + 1) // Force a re-render
   }
 
+  // Load a saved board
+  const handleLoadBoard = (board: CatanBoardType, options: BoardGeneratorOptions) => {
+    setBoardData(board)
+    setBoardOptions(options)
+    setBoardKey(prevKey => prevKey + 1) // Force a re-render
+  }
+
   // Update options without regenerating the board
   const handleOptionsChange = (options: BoardGeneratorOptions) => {
     setBoardOptions(options)
@@ -55,6 +62,7 @@ function App() {
           options={boardOptions}
           onOptionsChange={handleOptionsChange}
           boardData={boardData}
+          onLoadBoard={handleLoadBoard}
         />
         
         <div className="board-container">

@@ -106,6 +106,22 @@
   cursor: not-allowed;
 }
 
+.load-button {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.load-button:hover {
+  background-color: #1976d2;
+}
+
 input[type="checkbox"]:disabled + span {
   color: #999;
 } 
