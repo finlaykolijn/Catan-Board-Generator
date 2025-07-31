@@ -57,7 +57,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
 
       if (response.ok) {
         const result = await response.json();
-        alert('Board saved successfully to database!');
+        alert('Board saved successfully to JSONB database!');
         console.log('Board saved:', result);
       } else {
         // Check if response is JSON or HTML
@@ -187,7 +187,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
           onClick={handleSaveBoard}
           disabled={!boardData}
         >
-          Save Board as JSON
+          Save Board to Database
         </button>
       </div>
     </div>

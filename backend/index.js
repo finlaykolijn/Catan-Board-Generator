@@ -51,7 +51,7 @@ app.put('/api/save-board', async (req, res) => {
     // Insert into database
     const result = await pool.query(
       'INSERT INTO public."base_catan_boards" (board_name, board) VALUES ($1, $2) RETURNING *',
-      [boardName, JSON.stringify(boardData)]
+      [boardName, boardData]
     );
 
     res.status(201).json({
