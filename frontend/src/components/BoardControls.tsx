@@ -10,10 +10,40 @@ interface BoardControlsProps {
   onLoadBoard: (board: CatanBoard, options: BoardGeneratorOptions) => void;
 }
 
+// Input sanitization constants
+const MAX_BOARD_NAME_LENGTH = 30;
+const ALLOWED_CHARACTERS_REGEX = /^[a-zA-Z0-9\s\-_.,!?()]+$/;
+
+// Sanitize board name input (for final user submission)
+const sanitizeBoardName = (input: string): string => {
+  // Remove any characters that don't match our allowed pattern
+  const sanitized = input.replace(/[^a-zA-Z0-9\s\-_.,!?()]/g, '');
+  // Trim whitespace and limit to 30 characters
+  return sanitized.trim().substring(0, MAX_BOARD_NAME_LENGTH);
+};
+
+// Validate board name
+const validateBoardName = (name: string): { isValid: boolean; error?: string } => {
+  if (!name.trim()) {
+    return { isValid: false, error: 'Board name cannot be empty' };
+  }
+  
+  if (name.length > MAX_BOARD_NAME_LENGTH) {
+    return { isValid: false, error: `Board name cannot exceed ${MAX_BOARD_NAME_LENGTH} characters` };
+  }
+  
+  if (!ALLOWED_CHARACTERS_REGEX.test(name)) {
+    return { isValid: false, error: 'Board name contains invalid characters. Only letters, numbers, spaces, dashes, underscores, commas, periods, exclamation marks, question marks, and parentheses are allowed.' };
+  }
+  
+  return { isValid: true };
+};
+
 const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange, boardData, onLoadBoard }) => {
   const [showBoardSelector, setShowBoardSelector] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [boardName, setBoardName] = useState('');
+  const [nameError, setNameError] = useState<string>('');
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = event.target;
@@ -49,17 +79,32 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
     setShowNameDialog(true);
   };
 
+  const handleBoardNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setBoardName(value);
+    
+    // Clear error when user starts typing
+    if (nameError) {
+      setNameError('');
+    }
+  };
+
   const handleConfirmSave = async () => {
-    if (!boardName.trim()) {
-      alert('Please enter a name for the board.');
+    const validation = validateBoardName(boardName);
+    
+    if (!validation.isValid) {
+      setNameError(validation.error || 'Invalid board name');
       return;
     }
+
+    // Sanitize the name for final submission
+    const sanitizedName = sanitizeBoardName(boardName);
 
     // Create a data object that includes both the board data and the generation options
     const saveData = {
       board: boardData,
       options: options,
-      name: boardName.trim(),
+      name: sanitizedName,
       generatedAt: new Date().toISOString(),
       version: '1.0'
     };
@@ -80,6 +125,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
         // Reset the dialog state
         setShowNameDialog(false);
         setBoardName('');
+        setNameError('');
       } else {
         // Check if response is JSON or HTML
         const contentType = response.headers.get('content-type');
@@ -104,10 +150,11 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
   const handleCancelSave = () => {
     setShowNameDialog(false);
     setBoardName('');
+    setNameError('');
   };
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && boardName.trim()) {
+    if (event.key === 'Enter' && boardName.trim() && !nameError) {
       handleConfirmSave();
     } else if (event.key === 'Escape') {
       handleCancelSave();
@@ -230,18 +277,11 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
         <button className="generate-button" onClick={handleGenerateBoard}>
           Generate New Board
         </button>
-        <button 
-          className="save-button" 
-          onClick={handleSaveBoard}
-          disabled={!boardData}
-        >
-          Save Board to Database
+        <button className="save-button" onClick={handleSaveBoard}disabled={!boardData}>
+          Save Board
         </button>
-        <button 
-          className="load-button" 
-          onClick={handleLoadBoards}
-        >
-          Load Saved Boards
+        <button className="load-button" onClick={handleLoadBoards}> 
+          Load Board
         </button>
       </div>
 
@@ -256,16 +296,24 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
         <div className="board-naming-overlay" onClick={handleOverlayClick}>
           <div className="board-naming-content">
             <h3>Name Your Board</h3>
-            <p>Please enter a name for your board:</p>
+            <p>Please enter a name for your board (max {MAX_BOARD_NAME_LENGTH} characters):</p>
             <input
               type="text"
               value={boardName}
-              onChange={(e) => setBoardName(e.target.value)}
+              onChange={handleBoardNameChange}
               onKeyPress={handleKeyPress}
               placeholder="Enter board name..."
               className="board-name-input"
               autoFocus
             />
+            {nameError && (
+              <div className="name-error">
+                {nameError}
+              </div>
+            )}
+            <div className="character-count">
+              {boardName.length}/{MAX_BOARD_NAME_LENGTH} characters
+            </div>
             <div className="board-naming-buttons">
               <button 
                 className="cancel-button" 
@@ -276,7 +324,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
               <button 
                 className="save-button" 
                 onClick={handleConfirmSave}
-                disabled={!boardName.trim()}
+                disabled={!boardName.trim() || !!nameError}
               >
                 Save Board
               </button>
