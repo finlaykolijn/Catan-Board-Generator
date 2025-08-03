@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import CatanBoard from './components/CatanBoard'
 import BoardControls from './components/BoardControls'
 import BoardPreferences from './components/BoardPreferences'
+import CommunityBoards from './components/CommunityBoards'
 import { BoardGeneratorOptions, CatanBoard as CatanBoardType } from './types/catan'
 import { generateBoard } from './utils/boardGenerator'
 import './App.css'
 import './styles/BoardControls.css'
 
 function App() {
+  const [activeTab, setActiveTab] = useState<'generator' | 'saved'>('generator')
   const [boardKey, setBoardKey] = useState(0) // Used to force re-render of board
   const [boardData, setBoardData] = useState<CatanBoardType | undefined>(undefined) // Initially set to undefined
   const [boardOptions, setBoardOptions] = useState<BoardGeneratorOptions>({
@@ -35,6 +37,7 @@ function App() {
     setBoardData(board)
     setBoardOptions(options)
     setBoardKey(prevKey => prevKey + 1) // Force a re-render
+    setActiveTab('generator') // Switch to generator tab when loading a board
   }
 
   // Update options without regenerating the board
@@ -54,32 +57,51 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>Catan Board Generator</h1>
+        <div className="tab-navigation">
+          <button 
+            className={`tab-button ${activeTab === 'generator' ? 'active' : ''}`}
+            onClick={() => setActiveTab('generator')}
+          >
+            Board Generator
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'saved' ? 'active' : ''}`}
+            onClick={() => setActiveTab('saved')}
+          >
+            Community Boards
+          </button>
+        </div>
       </header>
       
       <main className="App-main">
-        <BoardControls 
-          onGenerateBoard={handleGenerateBoard} 
-          options={boardOptions}
-          onOptionsChange={handleOptionsChange}
-          boardData={boardData}
-          onLoadBoard={handleLoadBoard}
-        />
-        
-        <div className="board-container">
-          <BoardPreferences 
-            options={boardOptions}
-            onChange={handleOptionsChange}
-          />
-          <CatanBoard 
-            key={boardKey}
-            options={boardOptions}
-            boardData={boardData}
-            width={800}
-            height={600}
-            //width={window.innerWidth > 768 ? 800 : window.innerWidth - 40} 
-            //height={window.innerWidth > 768 ? 600 : window.innerWidth * 0.75} 
-          />
-        </div>
+        {activeTab === 'generator' ? (
+          <>
+            <BoardControls 
+              onGenerateBoard={handleGenerateBoard} 
+              options={boardOptions}
+              onOptionsChange={handleOptionsChange}
+              boardData={boardData}
+            />
+            
+            <div className="board-container">
+              <BoardPreferences 
+                options={boardOptions}
+                onChange={handleOptionsChange}
+              />
+              <CatanBoard 
+                key={boardKey}
+                options={boardOptions}
+                boardData={boardData}
+                width={800}
+                height={600}
+                //width={window.innerWidth > 768 ? 800 : window.innerWidth - 40} 
+                //height={window.innerWidth > 768 ? 600 : window.innerWidth * 0.75} 
+              />
+            </div>
+          </>
+        ) : (
+          <CommunityBoards onLoadBoard={handleLoadBoard} />
+        )}
       </main>
       
       <footer className="App-footer">

@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { BoardGeneratorOptions, ResourceType, CatanBoard } from '../types/catan';
-import BoardSelector from './BoardSelector';
 
 interface BoardControlsProps {
   onGenerateBoard: (options: BoardGeneratorOptions) => void;
   options: BoardGeneratorOptions;
   onOptionsChange: (options: BoardGeneratorOptions) => void;
   boardData?: CatanBoard; // Add board data prop
-  onLoadBoard: (board: CatanBoard, options: BoardGeneratorOptions) => void;
 }
 
 // Input sanitization constants
@@ -39,8 +37,7 @@ const validateBoardName = (name: string): { isValid: boolean; error?: string } =
   return { isValid: true };
 };
 
-const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange, boardData, onLoadBoard }) => {
-  const [showBoardSelector, setShowBoardSelector] = useState(false);
+const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange, boardData }) => {
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [boardName, setBoardName] = useState('');
   const [nameError, setNameError] = useState<string>('');
@@ -168,13 +165,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
     }
   };
 
-  const handleLoadBoards = () => {
-    setShowBoardSelector(true);
-  };
 
-  const handleBoardSelect = (board: CatanBoard, boardOptions: BoardGeneratorOptions) => {
-    onLoadBoard(board, boardOptions);
-  };
 
   const resourceTypes: ResourceType[] = ['forest', 'pasture', 'fields', 'hills', 'mountains'];
 
@@ -281,16 +272,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
         <button className="save-button" onClick={handleSaveBoard}disabled={!boardData}>
           Save Board
         </button>
-        <button className="load-button" onClick={handleLoadBoards}> 
-          Load Board
-        </button>
       </div>
-
-      <BoardSelector
-        isOpen={showBoardSelector}
-        onClose={() => setShowBoardSelector(false)}
-        onBoardSelect={handleBoardSelect}
-      />
 
       {/* Board Naming Dialog */}
       {showNameDialog && (
