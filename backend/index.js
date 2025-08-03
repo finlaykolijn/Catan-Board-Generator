@@ -33,7 +33,7 @@ app.get('/api/get-boards', async (req, res) => {
 
 app.put('/api/save-board', async (req, res) => {
   try {
-    const { board, options, name, generatedAt, version } = req.body;
+    const { board, options, name, generatedAt, version, rating = 0 } = req.body;
     
     // Validate required data
     if (!board || !board.hexes) {
@@ -51,16 +51,17 @@ app.put('/api/save-board', async (req, res) => {
       version: version
     };
 
-    // Insert into database
+    // Insert into database with rating
     const result = await pool.query(
-      'INSERT INTO public."base_catan_boards" (board_name, board) VALUES ($1, $2) RETURNING *',
-      [boardName, boardData]
+      'INSERT INTO public."base_catan_boards" (board_name, board, rating) VALUES ($1, $2, $3) RETURNING *',
+      [boardName, boardData, rating]
     );
 
     res.status(201).json({
       message: 'Board saved successfully',
       id: result.rows[0].id,
-      boardName: result.rows[0].board_name
+      boardName: result.rows[0].board_name,
+      rating: result.rows[0].rating
     });
 
   } catch (err) {

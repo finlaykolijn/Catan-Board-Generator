@@ -5,6 +5,7 @@ import '../styles/BoardSelector.css';
 interface SavedBoard {
   id: number;
   board_name: string;
+  rating: number;
   board: {
     board: CatanBoard;
     options: BoardGeneratorOptions;
@@ -100,6 +101,9 @@ const BoardSelector: React.FC<BoardSelectorProps> = ({ onBoardSelect, onClose, i
                   <div className="board-info">
                     {board.board.options?.fiveAndSixPlayerExpansion ? '5-6 Player' : 'Standard'} Board
                     {board.board.options?.forceDesertInMiddle && ' • Desert in Middle'}
+                  </div>
+                  <div className="board-rating">
+                    Rating: {board.rating}/5
                   </div>
                 </div>
               ))}

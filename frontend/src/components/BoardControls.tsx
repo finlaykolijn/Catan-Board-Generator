@@ -106,7 +106,8 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
       options: options,
       name: sanitizedName,
       generatedAt: new Date().toLocaleString(),
-      version: '1.0'
+      version: '1.0',
+      rating: 0 // Default rating for new boards
     };
 
     try {
