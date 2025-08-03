@@ -11,7 +11,7 @@ interface BoardControlsProps {
 }
 
 // Input sanitization constants
-const MAX_BOARD_NAME_LENGTH = 30;
+const MAX_BOARD_NAME_LENGTH = 30; // Can edit this to change the max length of the board name
 const ALLOWED_CHARACTERS_REGEX = /^[a-zA-Z0-9\s\-_.,!?()]+$/;
 
 // Sanitize board name input (for final user submission)
@@ -105,7 +105,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
       board: boardData,
       options: options,
       name: sanitizedName,
-      generatedAt: new Date().toISOString(),
+      generatedAt: new Date().toLocaleString(),
       version: '1.0'
     };
 

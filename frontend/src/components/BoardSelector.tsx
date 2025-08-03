@@ -11,7 +11,6 @@ interface SavedBoard {
     generatedAt: string;
     version: string;
   };
-  created_at: string;
 }
 
 interface BoardSelectorProps {
@@ -97,7 +96,7 @@ const BoardSelector: React.FC<BoardSelectorProps> = ({ onBoardSelect, onClose, i
               {boards.map((board) => (
                 <div key={board.id} className="board-item" onClick={() => handleBoardSelect(board)}>
                   <div className="board-name">{board.board_name}</div>
-                  <div className="board-date">Created: {board.created_at}</div>
+                  <div className="board-date">Created: {board.board.generatedAt}</div>
                   <div className="board-info">
                     {board.board.options?.fiveAndSixPlayerExpansion ? '5-6 Player' : 'Standard'} Board
                     {board.board.options?.forceDesertInMiddle && ' • Desert in Middle'}
