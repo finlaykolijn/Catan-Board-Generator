@@ -11,7 +11,7 @@
   z-index: 1000;
 }
 
-.board-selector-modal {
+.board-selector-content {
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -59,7 +59,7 @@
   color: #333;
 }
 
-.board-selector-content {
+.board-selector-body {
   padding: 20px;
   overflow-y: auto;
   flex: 1;

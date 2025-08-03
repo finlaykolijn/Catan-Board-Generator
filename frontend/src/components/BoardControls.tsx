@@ -12,6 +12,8 @@ interface BoardControlsProps {
 
 const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange, boardData, onLoadBoard }) => {
   const [showBoardSelector, setShowBoardSelector] = useState(false);
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [boardName, setBoardName] = useState('');
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = event.target;
@@ -43,10 +45,21 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
       return;
     }
 
+    // Show the naming dialog first
+    setShowNameDialog(true);
+  };
+
+  const handleConfirmSave = async () => {
+    if (!boardName.trim()) {
+      alert('Please enter a name for the board.');
+      return;
+    }
+
     // Create a data object that includes both the board data and the generation options
     const saveData = {
       board: boardData,
       options: options,
+      name: boardName.trim(),
       generatedAt: new Date().toISOString(),
       version: '1.0'
     };
@@ -64,6 +77,9 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
         const result = await response.json();
         alert('Board saved successfully to JSONB database!');
         console.log('Board saved:', result);
+        // Reset the dialog state
+        setShowNameDialog(false);
+        setBoardName('');
       } else {
         // Check if response is JSON or HTML
         const contentType = response.headers.get('content-type');
@@ -82,6 +98,25 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       alert(`Error saving board: ${errorMessage}`);
       console.error('Network error:', error);
+    }
+  };
+
+  const handleCancelSave = () => {
+    setShowNameDialog(false);
+    setBoardName('');
+  };
+
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' && boardName.trim()) {
+      handleConfirmSave();
+    } else if (event.key === 'Escape') {
+      handleCancelSave();
+    }
+  };
+
+  const handleOverlayClick = (event: React.MouseEvent) => {
+    if (event.target === event.currentTarget) {
+      handleCancelSave();
     }
   };
 
@@ -215,6 +250,40 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
         onClose={() => setShowBoardSelector(false)}
         onBoardSelect={handleBoardSelect}
       />
+
+      {/* Board Naming Dialog */}
+      {showNameDialog && (
+        <div className="board-naming-overlay" onClick={handleOverlayClick}>
+          <div className="board-naming-content">
+            <h3>Name Your Board</h3>
+            <p>Please enter a name for your board:</p>
+            <input
+              type="text"
+              value={boardName}
+              onChange={(e) => setBoardName(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Enter board name..."
+              className="board-name-input"
+              autoFocus
+            />
+            <div className="board-naming-buttons">
+              <button 
+                className="cancel-button" 
+                onClick={handleCancelSave}
+              >
+                Cancel
+              </button>
+              <button 
+                className="save-button" 
+                onClick={handleConfirmSave}
+                disabled={!boardName.trim()}
+              >
+                Save Board
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

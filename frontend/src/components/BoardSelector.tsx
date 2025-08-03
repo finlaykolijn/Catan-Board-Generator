@@ -65,21 +65,17 @@ const BoardSelector: React.FC<BoardSelectorProps> = ({ onBoardSelect, onClose, i
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
-
   if (!isOpen) return null;
 
   return (
     <div className="board-selector-overlay">
-      <div className="board-selector-modal">
+      <div className="board-selector-content">
         <div className="board-selector-header">
           <h2>Load Saved Board</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
         
-        <div className="board-selector-content">
+        <div className="board-selector-body">
           {loading && <div className="loading">Loading saved boards...</div>}
           
           {error && (
@@ -101,7 +97,7 @@ const BoardSelector: React.FC<BoardSelectorProps> = ({ onBoardSelect, onClose, i
               {boards.map((board) => (
                 <div key={board.id} className="board-item" onClick={() => handleBoardSelect(board)}>
                   <div className="board-name">{board.board_name}</div>
-                  <div className="board-date">Created: {formatDate(board.created_at)}</div>
+                  <div className="board-date">Created: {board.created_at}</div>
                   <div className="board-info">
                     {board.board.options?.fiveAndSixPlayerExpansion ? '5-6 Player' : 'Standard'} Board
                     {board.board.options?.forceDesertInMiddle && ' • Desert in Middle'}

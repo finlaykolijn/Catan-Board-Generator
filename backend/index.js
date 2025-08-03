@@ -33,15 +33,15 @@ app.get('/api/get-boards', async (req, res) => {
 
 app.put('/api/save-board', async (req, res) => {
   try {
-    const { board, options, generatedAt, version } = req.body;
+    const { board, options, name, generatedAt, version } = req.body;
     
     // Validate required data
     if (!board || !board.hexes) {
       return res.status(400).json({ error: 'Invalid board data' });
     }
 
-    // Create a board name based on timestamp and options
-    const boardName = `Catan Board - ${new Date(generatedAt).toLocaleString()}`;
+    // Use the provided name or create a default name if none provided
+    const boardName = name && name.trim() ? name.trim() : `Catan Board - ${new Date(generatedAt).toLocaleString()}`;
     
     // Prepare the data to store
     const boardData = {
