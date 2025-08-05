@@ -3,7 +3,7 @@ import cors from 'cors'
 import pg from 'pg'
 import dotenv from 'dotenv'
 
-// Load environment variables based on NODE_ENV
+// Load environment variables based
 if (process.env.NODE_ENV === 'production') {
   // In production, only use DATABASE_URL
   dotenv.config()
