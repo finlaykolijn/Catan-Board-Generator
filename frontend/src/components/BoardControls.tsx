@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { BoardGeneratorOptions, ResourceType, CatanBoard } from '../types/catan';
+import { API_ENDPOINTS } from '../config';
 
 interface BoardControlsProps {
   onGenerateBoard: (options: BoardGeneratorOptions) => void;
@@ -108,7 +109,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
     };
 
     try {
-      const response = await fetch('http://localhost:3001/api/save-board', {
+      const response = await fetch(API_ENDPOINTS.SAVE_BOARD, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

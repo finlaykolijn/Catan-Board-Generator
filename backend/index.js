@@ -3,19 +3,34 @@ import cors from 'cors'
 import pg from 'pg'
 import dotenv from 'dotenv'
 
-dotenv.config({path: "../.env"})
+// Load environment variables based on NODE_ENV
+if (process.env.NODE_ENV === 'production') {
+  // In production, only use DATABASE_URL
+  dotenv.config()
+} else {
+  // In development, try to load from ../.env for Docker setup
+  dotenv.config({path: "../.env"})
+}
 
 const app = express()
 app.use(cors())
 app.use(express.json())
 
-const pool = new pg.Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASS,
-  port: 5432
-})
+// Use DATABASE_URL from Supabase if available, otherwise fall back to individual env vars
+const pool = new pg.Pool(
+  process.env.DATABASE_URL 
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false } // Required for Supabase
+      }
+    : {
+        user: process.env.DB_USER,
+        host: process.env.DB_HOST,
+        database: process.env.DB_NAME,
+        password: process.env.DB_PASS,
+        port: 5432
+      }
+)
 
 app.get('/api/get-boards', async (req, res) => {
   try {
@@ -71,8 +86,9 @@ app.put('/api/save-board', async (req, res) => {
 });
 
 
-app.listen(3001, () => {
-  console.log('API running on http://localhost:3001')
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`API running on port ${PORT}`)
 })
 
 // Not currently used, could be useful later

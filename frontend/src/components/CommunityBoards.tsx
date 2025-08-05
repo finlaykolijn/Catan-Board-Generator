@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CatanBoard, BoardGeneratorOptions } from '../types/catan';
+import { API_ENDPOINTS } from '../config';
 import '../styles/CommunityBoards.css';
 
 interface SavedBoard {
@@ -32,7 +33,7 @@ const CommunityBoards: React.FC<CommunityBoardsProps> = ({ onLoadBoard }) => {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:3001/api/get-boards');
+      const response = await fetch(API_ENDPOINTS.GET_BOARDS);
       
       if (response.ok) {
         const data = await response.json();

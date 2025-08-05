@@ -51,6 +51,7 @@ npm install
 
 ### Environment Setup
 
+#### Local Development
 1. Create a `.env` file in the root directory with your database credentials:
 ```bash
 DB_USER=your_username
@@ -58,6 +59,14 @@ DB_PASS=your_password
 DB_NAME=catandb
 DB_HOST=localhost
 ```
+
+#### Production Deployment
+For production deployment with Supabase, use:
+```bash
+DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
+```
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
 
 2. Set up the database:
 ```bash
