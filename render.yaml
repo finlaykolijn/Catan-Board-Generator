@@ -16,6 +16,4 @@ services:
   - type: pserv
     name: catan-board-generator-db
     env: postgresql
-    plan: free
-    ipAllowList: []
-    initScript: init.sql 
+    plan: free 
