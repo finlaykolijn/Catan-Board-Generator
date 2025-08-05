@@ -7,6 +7,15 @@ services:
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: catan-board-generator-db
+          property: connectionString
       - key: NODE_ENV
-        value: production 
+        value: production
+
+  - type: pserv
+    name: catan-board-generator-db
+    env: postgresql
+    plan: free
+    ipAllowList: []
+    initScript: init.sql 
