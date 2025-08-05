@@ -112,7 +112,7 @@ npm run dev
 ```
 This will start the frontend at http://localhost:5173 with basic board generation features.
 
-#### Option 2: Run Full Stack (All Features)
+#### Option 2: Run Full Stack (All features except PostgreSQL integration)
 1. Start the backend:
 ```bash
 cd backend
