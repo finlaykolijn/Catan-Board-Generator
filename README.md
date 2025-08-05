@@ -4,24 +4,63 @@ A web application that generates random Catan game boards with customizable opti
 
 **Live Demo**: You can view the production version at [catanboardgenerator.ca](https://catanboardgenerator.ca)
 
-**Development Version**: To view the latest development features, clone the repository and run locally (see setup instructions below).
+
 
 ## Features
 
+### Core Board Generation
 - **Random Board Generation**: Generate standard Catan boards with customizable options
 - **Visual Representation**: Hexagonal tiles with resource types and number tokens
 - **Probability Dots**: Visual indicators for number token probabilities
-- **Board Customization**:
+- **5 & 6 Player Expansion**: Support for larger board layouts
+
+### Board Customization
+- **Visual Options**:
   - Toggle resource images vs. text labels
   - Show/hide hex borders
+  - Customizable board size and layout
+- **Generation Rules**:
   - Force desert in center position
-  - Resource bias preferences
+  - Resource bias preferences (favor specific resources)
   - Adjacency rules for high-probability numbers (6 & 8, 2 & 12)
-- **Community Boards**: Save and share boards with the community
-- **5 & 6 Player Expansion**: Support for larger board layouts
-- **Board Preferences**: Customizable visual and generation settings
+  - Customizable board preferences
 
-## Getting Started
+### Community Features
+- **Board Sharing**: Save and share boards with the community
+- **Board Rating System**: Rate and discover popular boards
+- **Board History**: View when boards were created
+- **Board Metadata**: Display board type and features
+
+### User Experience
+- **Tabbed Interface**: Separate tabs for board generation and community boards
+- **Real-time Updates**: Instant board regeneration with new options
+- **Responsive Design**: Works on desktop and mobile devices
+- **Input Validation**: Sanitized board names and user inputs
+
+## Technologies Used
+
+### Frontend
+- **React 19** with TypeScript for modern component-based UI
+- **Vite** for fast development and optimized builds
+- **Konva & React-Konva** for high-performance canvas rendering
+- **CSS3** for responsive styling and animations
+- **ESLint** with TypeScript rules for code quality
+
+### Backend
+- **Node.js** with Express.js for RESTful API
+- **PostgreSQL** for data persistence (deployed on Render)
+- **pg** (node-postgres) for database connectivity
+- **CORS** enabled for cross-origin requests
+- **dotenv** for environment variable management
+
+### Deployment & Infrastructure
+- **Render** for backend hosting and PostgreSQL database
+- **Docker** for local development environment
+- **Git** for version control
+
+
+
+**Development Version**: To view the latest development features, clone the repository and run locally (see setup instructions below).
 
 ### Prerequisites
 
@@ -45,7 +84,7 @@ npm install
 
 3. Install backend dependencies:
 ```bash
-cd ../backend
+cd backend
 npm install
 ```
 
@@ -56,18 +95,9 @@ npm install
 ```bash
 DB_USER=your_username
 DB_PASS=your_password
-DB_NAME=catandb
+DB_NAME=your_database_name
 DB_HOST=localhost
 ```
-
-#### Production Deployment
-For production deployment with Supabase, use:
-```bash
-DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
-```
-
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
-
 2. Set up the database:
 ```bash
 docker-compose up -d db
@@ -105,19 +135,6 @@ For a complete setup with PostgreSQL:
 docker-compose up -d
 ```
 
-## Technologies Used
-
-- **Frontend**:
-  - React 19 with TypeScript
-  - Vite for build tooling
-  - Konva for canvas rendering
-  - CSS for styling
-
-- **Backend**:
-  - Node.js with Express
-  - PostgreSQL for data storage
-  - CORS enabled for cross-origin requests
-
 ## Game Information
 
 The standard Catan board consists of:
@@ -139,11 +156,21 @@ The standard Catan board consists of:
 ├── frontend/          # React TypeScript application
 │   ├── src/
 │   │   ├── components/  # React components
+│   │   │   ├── CatanBoard.tsx      # Main board rendering
+│   │   │   ├── BoardControls.tsx   # Generation controls
+│   │   │   ├── BoardPreferences.tsx # Visual preferences
+│   │   │   ├── CommunityBoards.tsx # Community features
+│   │   │   ├── HexTile.tsx         # Individual hex rendering
+│   │   │   └── BoardSelector.tsx   # Board selection UI
 │   │   ├── types/       # TypeScript type definitions
-│   │   └── utils/       # Utility functions
+│   │   ├── utils/       # Utility functions
+│   │   ├── styles/      # CSS stylesheets
+│   │   └── assets/      # Static assets
 │   └── package.json
 ├── backend/           # Node.js Express API
 │   ├── index.js       # Main server file
+│   ├── render.yaml    # Render deployment config
+│   ├── init.sql       # Database initialization
 │   └── package.json
 └── docker-compose.yml # Docker configuration
 ```
@@ -157,6 +184,11 @@ The standard Catan board consists of:
 
 **Backend**:
 - `npm start` - Start the server
+
+### API Endpoints
+
+- `GET /api/get-boards` - Retrieve all saved boards
+- `PUT /api/save-board` - Save a new board to the community
 
 ## License
 
