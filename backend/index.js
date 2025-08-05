@@ -3,7 +3,7 @@ import cors from 'cors'
 import pg from 'pg'
 import dotenv from 'dotenv'
 
-// Load environment variables based
+// Load environment variables based on NODE_ENV
 if (process.env.NODE_ENV === 'production') {
   // In production, only use DATABASE_URL
   dotenv.config()
@@ -15,6 +15,19 @@ if (process.env.NODE_ENV === 'production') {
 const app = express()
 app.use(cors())
 app.use(express.json())
+
+// Debug: Log environment variables
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+if (process.env.DATABASE_URL) {
+  const maskedUrl = process.env.DATABASE_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@');
+  console.log('Using DATABASE_URL:', maskedUrl);
+} else {
+  console.log('DATABASE_URL not found, using individual env vars');
+  console.log('DB_HOST:', process.env.DB_HOST);
+  console.log('DB_USER:', process.env.DB_USER);
+  console.log('DB_NAME:', process.env.DB_NAME);
+}
 
 // Use DATABASE_URL from Supabase if available, otherwise fall back to individual env vars
 const pool = new pg.Pool(
