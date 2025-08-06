@@ -1,9 +1,11 @@
 import { Stage, Layer } from 'react-konva';
 import { useState, useEffect, useRef } from 'react';
 import HexTile from './HexTile';
+import Border from './Border';
 import { generateBoard } from '../utils/boardGenerator';
 import { CatanBoard as CatanBoardType, BoardGeneratorOptions } from '../types/catan';
 import { preloadImages } from '../utils/resourceImages';
+import { preloadBorderImages } from '../utils/borderImages';
 
 interface CatanBoardProps {
   options?: BoardGeneratorOptions;
@@ -15,10 +17,12 @@ interface CatanBoardProps {
 const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, boardData }) => {
   const [board, setBoard] = useState<CatanBoardType | null>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [borderImagesLoaded, setBorderImagesLoaded] = useState(false);
   const stageRef = useRef<any>(null);
   const hexSize = 25;
   const useImages = options.useImages || false;
   const showBorders = options.showBorders || false;
+  const useFullBorder = options.useFullBorder || false;
   const isFiveSixPlayer = options.fiveAndSixPlayerExpansion || false;
   
   // Preload images when useImages option changes
@@ -29,6 +33,15 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
         .catch(error => console.error('Error preloading images:', error));
     }
   }, [useImages]);
+
+  // Preload border images when useFullBorder option changes
+  useEffect(() => {
+    if (useFullBorder) {
+      preloadBorderImages()
+        .then(() => setBorderImagesLoaded(true))
+        .catch(error => console.error('Error preloading border images:', error));
+    }
+  }, [useFullBorder]);
   
   // Use provided board data or generate a new one only on initial mount
   useEffect(() => {
@@ -49,6 +62,10 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
   if (useImages && !imagesLoaded) {
     return <div>Loading images...</div>;
   }
+
+  if (useFullBorder && !borderImagesLoaded) {
+    return <div>Loading border images...</div>;
+  }
   
   // For hexagons with pointed top (not flat)
   //const hexWidth = Math.sqrt(3) * hexSize;
@@ -62,8 +79,8 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
   const boardHeight = hexHeight * 0.75 * (numRows - 1) + hexHeight * 0.25;
   
   // Adjust scaling factor for better mobile experience
-  const mobileScaleFactor = 0.8;
-  const desktopScaleFactor = 0.8; 
+  const mobileScaleFactor = 0.6; // Reduced from 0.8
+  const desktopScaleFactor = 0.6; // Reduced from 0.8
   
   // Calculate scale factor based on device type and available space
   const scaleFactor = Math.min(
@@ -87,6 +104,18 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
   
   return (
     <Stage width={width} height={height} ref={stageRef}>
+      {/* Border layer - rendered first so it appears behind the board */}
+      <Layer>
+        <Border 
+          options={options}
+          width={width}
+          height={height}
+          boardWidth={boardWidth * scaleFactor}
+          boardHeight={boardHeight * scaleFactor}
+        />
+      </Layer>
+      
+      {/* Board layer */}
       <Layer
         offsetX={offsetX}
         offsetY={offsetY}

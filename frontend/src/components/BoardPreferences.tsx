@@ -58,6 +58,18 @@ const BoardPreferences: React.FC<BoardPreferencesProps> = ({ options, onChange }
               Show Hex Borders
             </label>
           </div>
+          
+          <div className="preference-item">
+            <label>
+              <input
+                type="checkbox"
+                name="useFullBorder"
+                checked={options.useFullBorder ?? true}
+                onChange={handleOptionChange}
+              />
+              Use Border
+            </label>
+          </div>
         </div>
       )}
     </div>
