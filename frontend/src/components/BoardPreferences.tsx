@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BoardGeneratorOptions } from '../types/catan';
 import '../styles/BoardPreferences.css';
 
@@ -21,6 +21,16 @@ const BoardPreferences: React.FC<BoardPreferencesProps> = ({ options, onChange }
       [name]: checked
     });
   };
+
+  // Automatically disable border when 5&6 player expansion is enabled
+  useEffect(() => {
+    if (options.fiveAndSixPlayerExpansion && options.useFullBorder) {
+      onChange({
+        ...options,
+        useFullBorder: false
+      });
+    }
+  }, [options.fiveAndSixPlayerExpansion]);
 
   return (
     <div className="board-preferences">
@@ -66,9 +76,14 @@ const BoardPreferences: React.FC<BoardPreferencesProps> = ({ options, onChange }
                 name="useFullBorder"
                 checked={options.useFullBorder ?? true}
                 onChange={handleOptionChange}
+                disabled={options.fiveAndSixPlayerExpansion}
               />
               Use Border
+              
             </label>
+            {options.fiveAndSixPlayerExpansion && (
+              <span className="disabled-note"> (disabled for 5&6 player boards)</span>
+            )}
           </div>
         </div>
       )}
