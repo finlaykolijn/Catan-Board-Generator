@@ -15,6 +15,7 @@ function App() {
   const [boardOptions, setBoardOptions] = useState<BoardGeneratorOptions>({
     useImages: true, // Default to using images
     showBorders: false, // Default to not showing borders
+    useFullBorder: true, // Default to using border
     forceDesertInMiddle: false,
     includeCitiesAndKnights: false,
     includeSeafarers: false,

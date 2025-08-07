@@ -1,5 +1,7 @@
 export type ResourceType = 'forest' | 'pasture' | 'fields' | 'hills' | 'mountains' | 'desert';
 
+export type ShipType = '3for1' | 'wood' | 'sheep' | 'wheat' | 'ore' | 'brick';
+
 export interface Hex {
   id: string;
   resourceType: ResourceType;
@@ -29,6 +31,7 @@ export interface BoardGeneratorOptions {
   showBorders?: boolean;
   allow6And8Adjacent?: boolean;
   allow2And12Adjacent?: boolean;
+  useFullBorder?: boolean;
 }
 
 export interface ResourceImages {
