@@ -14,6 +14,7 @@ interface HarborRandomizerProps {
   width: number;
   height: number;
   showHarbors?: boolean;
+  fixedHarborLayout?: Array<{position: number, type: HarborType}>;
 }
 
 const HARBOR_IMAGES = {
@@ -43,10 +44,22 @@ const HARBOR_COMBINATION: HarborType[] = [
   'wood', 'brick', 'ore', 'wheat', 'sheep', '3for1', '3for1', '3for1', '3for1'
 ];
 
+// Function to generate a randomized harbor layout
+export function generateHarborLayout(): Array<{position: number, type: HarborType}> {
+  const shuffledHarbors = [...HARBOR_COMBINATION].sort(() => Math.random() - 0.5);
+  const positions = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+  
+  return shuffledHarbors.map((harborType, index) => ({
+    position: positions[index],
+    type: harborType
+  }));
+}
+
 const HarborRandomizer: React.FC<HarborRandomizerProps> = ({ 
   width, 
   height,
-  showHarbors = false
+  showHarbors = false,
+  fixedHarborLayout
 }) => {
   const [imagesLoaded, setImagesLoaded] = useState<Record<HarborType, boolean>>({
     wood: false,
@@ -82,6 +95,18 @@ const HarborRandomizer: React.FC<HarborRandomizerProps> = ({
   const randomizedHarbors = useMemo(() => {
     if (!showHarbors) return [];
 
+    // If a fixed layout is provided, use it; otherwise randomize
+    if (fixedHarborLayout) {
+      return fixedHarborLayout.map((harbor) => {
+        const offset = HARBOR_POSITION_OFFSETS[harbor.position - 1]; // Convert 1-9 to 0-8 index
+        return {
+          harborType: harbor.type,
+          x: (width - 40) / 2 + offset.x,
+          y: height - 40 + offset.y,
+        };
+      });
+    }
+
     // Create a copy of position offsets and shuffle them
     const shuffledPositionOffsets = [...HARBOR_POSITION_OFFSETS].sort(() => Math.random() - 0.5);
     const shuffledHarbors = [...HARBOR_COMBINATION].sort(() => Math.random() - 0.5);
@@ -94,7 +119,7 @@ const HarborRandomizer: React.FC<HarborRandomizerProps> = ({
         y: height - 40 + offset.y, // 40 is harbor height, using exact coordinates from user
       };
     });
-  }, [showHarbors, width, height]);
+  }, [showHarbors, width, height, fixedHarborLayout]);
 
   if (!showHarbors) {
     return null;

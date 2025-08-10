@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BoardGeneratorOptions, ResourceType, CatanBoard } from '../types/catan';
+import { BoardGeneratorOptions, ResourceType, CatanBoard, HarborType } from '../types/catan';
 import { API_ENDPOINTS } from '../config';
 
 interface BoardControlsProps {
@@ -7,6 +7,7 @@ interface BoardControlsProps {
   options: BoardGeneratorOptions;
   onOptionsChange: (options: BoardGeneratorOptions) => void;
   boardData?: CatanBoard; // Add board data prop
+  harborLayout?: Array<{position: number, type: HarborType}>; // Add harbor layout prop
 }
 
 // Input sanitization constants
@@ -38,7 +39,7 @@ const validateBoardName = (name: string): { isValid: boolean; error?: string } =
   return { isValid: true };
 };
 
-const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange, boardData }) => {
+const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options, onOptionsChange, boardData, harborLayout }) => {
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [boardName, setBoardName] = useState('');
   const [nameError, setNameError] = useState<string>('');
@@ -115,7 +116,8 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
       name: sanitizedName,
       generatedAt: new Date().toLocaleString(),
       version: '1.0',
-      rating: 0 // Default rating for new boards
+      rating: 0, // Default rating for new boards
+      harborLayout: harborLayout // Include harbor layout in save data
     };
 
     try {

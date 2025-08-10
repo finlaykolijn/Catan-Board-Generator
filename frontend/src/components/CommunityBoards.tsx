@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CatanBoard, BoardGeneratorOptions } from '../types/catan';
+import { CatanBoard, BoardGeneratorOptions, HarborType } from '../types/catan';
 import { API_ENDPOINTS } from '../config';
 import '../styles/CommunityBoards.css';
 
@@ -12,11 +12,12 @@ interface SavedBoard {
     options: BoardGeneratorOptions;
     generatedAt: string;
     version: string;
+    harborLayout?: Array<{position: number, type: HarborType}>;
   };
 }
 
 interface CommunityBoardsProps {
-  onLoadBoard: (board: CatanBoard, options: BoardGeneratorOptions) => void;
+  onLoadBoard: (board: CatanBoard, options: BoardGeneratorOptions, harborLayout?: Array<{position: number, type: HarborType}>) => void;
 }
 
 const CommunityBoards: React.FC<CommunityBoardsProps> = ({ onLoadBoard }) => {
@@ -54,7 +55,7 @@ const CommunityBoards: React.FC<CommunityBoardsProps> = ({ onLoadBoard }) => {
   const handleBoardSelect = (board: SavedBoard) => {
     try {
       console.log('Selected board:', board); // Debug log
-      onLoadBoard(board.board.board, board.board.options);
+      onLoadBoard(board.board.board, board.board.options, board.board.harborLayout);
     } catch (error) {
       console.error('Error loading board:', error);
       setError('Error loading board data');

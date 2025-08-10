@@ -4,7 +4,7 @@ import HexTile from './HexTile';
 import Border from './Border';
 import HarborRandomizer from './HarborRandomizer';
 import { generateBoard } from '../utils/boardGenerator';
-import { CatanBoard as CatanBoardType, BoardGeneratorOptions } from '../types/catan';
+import { CatanBoard as CatanBoardType, BoardGeneratorOptions, HarborType } from '../types/catan';
 import { preloadImages } from '../utils/resourceImages';
 import { preloadBorderImages } from '../utils/borderImages';
 
@@ -12,10 +12,11 @@ interface CatanBoardProps {
   options?: BoardGeneratorOptions;
   width: number;
   height: number;
-  boardData?: CatanBoardType; 
+  boardData?: CatanBoardType;
+  harborLayout?: Array<{position: number, type: HarborType}>;
 }
 
-const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, boardData }) => {
+const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, boardData, harborLayout }) => {
   const [board, setBoard] = useState<CatanBoardType | null>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [borderImagesLoaded, setBorderImagesLoaded] = useState(false);
@@ -141,6 +142,7 @@ const CatanBoard: React.FC<CatanBoardProps> = ({ options = {}, width, height, bo
           width={width}
           height={height}
           showHarbors={showHarbors}
+          fixedHarborLayout={harborLayout}
         />
       </Layer>
     </Stage>
