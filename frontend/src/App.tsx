@@ -3,19 +3,21 @@ import CatanBoard from './components/CatanBoard'
 import BoardControls from './components/BoardControls'
 import BoardPreferences from './components/BoardPreferences'
 import CommunityBoards from './components/CommunityBoards'
-import { BoardGeneratorOptions, CatanBoard as CatanBoardType } from './types/catan'
+import { BoardGeneratorOptions, CatanBoard as CatanBoardType, HarborType } from './types/catan'
 import { generateBoard } from './utils/boardGenerator'
+import { generateHarborLayout } from './components/HarborRandomizer'
 import './App.css'
 import './styles/BoardControls.css'
 
 function App() {
   const [activeTab, setActiveTab] = useState<'generator' | 'saved'>('generator')
-  const [boardKey, setBoardKey] = useState(0) // Used to force re-render of board
   const [boardData, setBoardData] = useState<CatanBoardType | undefined>(undefined) // Initially set to undefined
+  const [harborLayout, setHarborLayout] = useState<Array<{position: number, type: HarborType}> | undefined>(undefined)
   const [boardOptions, setBoardOptions] = useState<BoardGeneratorOptions>({
     useImages: true, // Default to using images
     showBorders: false, // Default to not showing borders
     useFullBorder: true, // Default to using border
+    showShips: false, // Default to not showing ships
     forceDesertInMiddle: false,
     includeCitiesAndKnights: false,
     includeSeafarers: false,
@@ -30,14 +32,20 @@ function App() {
     // Create a new board with current options
     const newBoard = generateBoard(options)
     setBoardData(newBoard)
-    setBoardKey(prevKey => prevKey + 1) // Force a re-render
+    
+    // Generate harbor layout if harbors are enabled
+    if (options.showShips) {
+      setHarborLayout(generateHarborLayout())
+    } else {
+      setHarborLayout(undefined)
+    }
   }
 
   // Load a saved board
-  const handleLoadBoard = (board: CatanBoardType, options: BoardGeneratorOptions) => {
+  const handleLoadBoard = (board: CatanBoardType, options: BoardGeneratorOptions, harborLayout?: Array<{position: number, type: HarborType}>) => {
     setBoardData(board)
     setBoardOptions(options)
-    setBoardKey(prevKey => prevKey + 1) // Force a re-render
+    setHarborLayout(harborLayout)
     setActiveTab('generator') // Switch to generator tab when loading a board
   }
 
@@ -51,6 +59,11 @@ function App() {
     if (!boardData) {
       const initialBoard = generateBoard(boardOptions)
       setBoardData(initialBoard)
+      
+      // Generate harbor layout if harbors are enabled
+      if (boardOptions.showShips) {
+        setHarborLayout(generateHarborLayout())
+      }
     }
   }, []) // Empty dependency array means it only runs once on mount
 
@@ -82,6 +95,7 @@ function App() {
               options={boardOptions}
               onOptionsChange={handleOptionsChange}
               boardData={boardData}
+              harborLayout={harborLayout}
             />
             
             <div className="board-container">
@@ -90,13 +104,13 @@ function App() {
                 onChange={handleOptionsChange}
               />
               <CatanBoard 
-                key={boardKey}
                 options={boardOptions}
                 boardData={boardData}
+                harborLayout={harborLayout}
                 width={800}
                 height={600}
                 //width={window.innerWidth > 768 ? 800 : window.innerWidth - 40} 
-                //height={window.innerWidth > 768 ? 600 : window.innerWidth * 0.75} 
+                //height={window.innerWidth > 600 : window.innerWidth * 0.75} 
               />
             </div>
           </>

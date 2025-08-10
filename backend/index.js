@@ -70,7 +70,7 @@ app.get('/api/get-boards', async (req, res) => {
 
 app.put('/api/save-board', async (req, res) => {
   try {
-    const { board, options, name, generatedAt, version, rating = 0 } = req.body;
+    const { board, options, name, generatedAt, version, rating = 0, harborLayout } = req.body;
     
     // Validate required data
     if (!board || !board.hexes) {
@@ -85,7 +85,8 @@ app.put('/api/save-board', async (req, res) => {
       board: board,
       options: options,
       generatedAt: generatedAt,
-      version: version
+      version: version,
+      harborLayout: harborLayout // Include harbor layout in the saved data
     };
 
     // Insert into database with rating
