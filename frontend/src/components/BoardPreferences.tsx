@@ -85,6 +85,8 @@ const BoardPreferences: React.FC<BoardPreferencesProps> = ({ options, onChange }
               <span className="disabled-note"> (disabled for 5&6 player boards)</span>
             )}
           </div>
+          
+
         </div>
       )}
     </div>

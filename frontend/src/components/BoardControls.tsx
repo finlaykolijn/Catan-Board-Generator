@@ -227,6 +227,18 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
           <label>
             <input
               type="checkbox"
+              name="showShips"
+              checked={options.showShips}
+              onChange={handleCheckboxChange}
+            />
+            Randomize Harbors
+          </label>
+        </div>
+        
+        <div className="checkbox-group">
+          <label>
+            <input
+              type="checkbox"
               name="includeCitiesAndKnights"
               checked={options.includeCitiesAndKnights}
               onChange={handleCheckboxChange}

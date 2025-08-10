@@ -16,6 +16,7 @@ function App() {
     useImages: true, // Default to using images
     showBorders: false, // Default to not showing borders
     useFullBorder: true, // Default to using border
+    showShips: false, // Default to not showing ships
     forceDesertInMiddle: false,
     includeCitiesAndKnights: false,
     includeSeafarers: false,
