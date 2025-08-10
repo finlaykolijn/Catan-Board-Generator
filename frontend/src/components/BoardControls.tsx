@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BoardGeneratorOptions, ResourceType, CatanBoard } from '../types/catan';
 import { API_ENDPOINTS } from '../config';
 
@@ -62,6 +62,16 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
       biasResources: newPrefs
     });
   };
+
+  // Automatically disable harbor option when 5&6 player expansion is enabled
+  useEffect(() => {
+    if (options.fiveAndSixPlayerExpansion && options.showShips) {
+      onOptionsChange({
+        ...options,
+        showShips: false
+      });
+    }
+  }, [options.fiveAndSixPlayerExpansion, options.showShips, onOptionsChange]);
 
   const handleGenerateBoard = () => {
     onGenerateBoard(options);
@@ -230,8 +240,12 @@ const BoardControls: React.FC<BoardControlsProps> = ({ onGenerateBoard, options,
               name="showShips"
               checked={options.showShips}
               onChange={handleCheckboxChange}
+              disabled={options.fiveAndSixPlayerExpansion}
             />
             Randomize Harbors
+            {options.fiveAndSixPlayerExpansion && (
+              <span className="disabled-note-generation-options"> (disabled for 5&6 player boards)</span>
+            )}
           </label>
         </div>
         
